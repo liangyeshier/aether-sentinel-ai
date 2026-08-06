@@ -114,8 +114,8 @@ public partial class MainWindow : Window
             ? "版本检查、包验证与回滚仍处于架构预留状态。"
             : "Version checking, package verification, and rollback are architecture placeholders.";
 
-        PhasePreviewTitleText.Text = zh ? "Phase 02 模块激活" : "Phase 02 Module Activation";
-        PhasePreviewBodyText.Text = zh ? "全部主导航已可点击，当前仍为只读与预留能力。" : "All main navigation modules are clickable; capabilities remain read-only or reserved.";
+        PhasePreviewTitleText.Text = zh ? "Phase 03 网络智能" : "Phase 03 Network Intelligence";
+        PhasePreviewBodyText.Text = zh ? "网络测速、DNS Provider 与只读扫描模型已进入架构层。" : "Network speed testing, DNS providers, and read-only scan models are now in the architecture layer.";
 
         ZhButton.Classes.Set("active", zh);
         EnButton.Classes.Set("active", !zh);

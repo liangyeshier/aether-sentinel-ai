@@ -107,18 +107,20 @@
           <TextBlock x:Name="BrandSubtitleText" Text="Performance Intelligence" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,8,0,0" />
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Margin="0,32,0,0">
-          <Button x:Name="NavDashboardButton" Classes="navButton active" Click="OnNavigateClicked" Tag="dashboard" Content="Dashboard" />
-          <Button x:Name="NavPcIntelligenceButton" Classes="navButton" Click="OnNavigateClicked" Tag="pc" Content="PC Intelligence" />
-          <Button x:Name="NavGameOptimizationButton" Classes="navButton" Click="OnNavigateClicked" Tag="game" Content="Game Optimization" />
-          <Button x:Name="NavPerformanceMonitorButton" Classes="navButton" Click="OnNavigateClicked" Tag="monitor" Content="Performance Monitor" />
-          <Button x:Name="NavOptimizationCenterButton" Classes="navButton" Click="OnNavigateClicked" Tag="optimization" Content="Optimization Center" />
-          <Button x:Name="NavDnsOptimizationButton" Classes="navButton" Click="OnNavigateClicked" Tag="dns" Content="DNS Optimization" />
-          <Button x:Name="NavNetworkSpeedButton" Classes="navButton" Click="OnNavigateClicked" Tag="speed" Content="Network Speed Test" />
-          <Button x:Name="NavAiAdvisorButton" Classes="navButton" Click="OnNavigateClicked" Tag="advisor" Content="AI Advisor" />
-          <Button x:Name="NavHistoryButton" Classes="navButton" Click="OnNavigateClicked" Tag="history" Content="History" />
-          <Button x:Name="NavSettingsButton" Classes="navButton" Click="OnNavigateClicked" Tag="settings" Content="Settings" />
-        </StackPanel>
+        <ScrollViewer Grid.Row="1" Margin="0,32,0,12" VerticalScrollBarVisibility="Auto">
+          <StackPanel>
+            <Button x:Name="NavDashboardButton" Classes="navButton active" Click="OnNavigateClicked" Tag="dashboard" Content="Dashboard" />
+            <Button x:Name="NavPcIntelligenceButton" Classes="navButton" Click="OnNavigateClicked" Tag="pc" Content="PC Intelligence" />
+            <Button x:Name="NavGameOptimizationButton" Classes="navButton" Click="OnNavigateClicked" Tag="game" Content="Game Optimization" />
+            <Button x:Name="NavPerformanceMonitorButton" Classes="navButton" Click="OnNavigateClicked" Tag="monitor" Content="Performance Monitor" />
+            <Button x:Name="NavOptimizationCenterButton" Classes="navButton" Click="OnNavigateClicked" Tag="optimization" Content="Optimization Center" />
+            <Button x:Name="NavDnsOptimizationButton" Classes="navButton" Click="OnNavigateClicked" Tag="dns" Content="DNS Optimization" />
+            <Button x:Name="NavNetworkSpeedButton" Classes="navButton" Click="OnNavigateClicked" Tag="speed" Content="Network Speed Test" />
+            <Button x:Name="NavAiAdvisorButton" Classes="navButton" Click="OnNavigateClicked" Tag="advisor" Content="AI Advisor" />
+            <Button x:Name="NavHistoryButton" Classes="navButton" Click="OnNavigateClicked" Tag="history" Content="History" />
+            <Button x:Name="NavSettingsButton" Classes="navButton" Click="OnNavigateClicked" Tag="settings" Content="Settings" />
+          </StackPanel>
+        </ScrollViewer>
 
         <Border Grid.Row="2" Classes="card" Padding="14">
           <StackPanel Spacing="9">

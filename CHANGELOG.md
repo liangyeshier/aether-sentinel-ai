@@ -4,6 +4,13 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.2] - Network Speed Navigation Visibility
+
+### Changed
+
+- Left navigation now scrolls when modules exceed the available sidebar height.
+- Right-side phase preview now reflects Phase 03 Network Intelligence.
+
 ## [0.3.1] - 360 DNS Provider Registry
 
 ### Added
