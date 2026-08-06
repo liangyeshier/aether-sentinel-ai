@@ -11,6 +11,7 @@ using AetherSentinel.Core.Network;
 using AetherSentinel.Core.Optimization;
 using AetherSentinel.Core.Performance;
 using AetherSentinel.Core.Scanning;
+using AetherSentinel.Core.Toolkit;
 using AetherSentinel.Platforms.Network;
 using AetherSentinel.Platforms.Monitoring;
 using AetherSentinel.Platforms.Scanning;
@@ -319,6 +320,7 @@ public partial class MainWindow : Window
         NavGameOptimizationButton.Content = zh ? "游戏优化" : "Game Optimization";
         NavPerformanceMonitorButton.Content = zh ? "性能监控" : "Performance Monitor";
         NavOptimizationCenterButton.Content = zh ? "优化中心" : "Optimization Center";
+        NavToolkitButton.Content = zh ? "工具中心" : "Toolkit Center";
         NavDnsOptimizationButton.Content = zh ? "DNS 优化" : "DNS Optimization";
         NavNetworkSpeedButton.Content = zh ? "网络测速" : "Network Speed Test";
         NavAiAdvisorButton.Content = zh ? "AI 顾问" : "AI Advisor";
@@ -560,6 +562,7 @@ public partial class MainWindow : Window
             (NavGameOptimizationButton, "game"),
             (NavPerformanceMonitorButton, "monitor"),
             (NavOptimizationCenterButton, "optimization"),
+            (NavToolkitButton, "toolkit"),
             (NavDnsOptimizationButton, "dns"),
             (NavNetworkSpeedButton, "speed"),
             (NavAiAdvisorButton, "advisor"),
@@ -583,6 +586,7 @@ public partial class MainWindow : Window
             "game" => IsZh ? "游戏优化" : "Game Optimization",
             "monitor" => IsZh ? "性能监控" : "Performance Monitor",
             "optimization" => IsZh ? "优化中心" : "Optimization Center",
+            "toolkit" => IsZh ? "工具中心" : "Toolkit Center",
             "dns" => IsZh ? "DNS 优化" : "DNS Optimization",
             "speed" => IsZh ? "网络测速" : "Network Speed Test",
             "advisor" => IsZh ? "AI 顾问" : "AI Advisor",
@@ -600,6 +604,7 @@ public partial class MainWindow : Window
             "game" => IsZh ? "游戏前检查、游戏中保护与配置档预留" : "Pre-game checks, in-game protection, and profile reservations",
             "monitor" => IsZh ? "按需启动的轻量实时指标与趋势视图" : "On-demand lightweight realtime metrics and trend views",
             "optimization" => IsZh ? "安全优化规则、风险等级、备份与回滚框架" : "Safe optimization rules, risk levels, backup, and rollback framework",
+            "toolkit" => IsZh ? "面向 Windows 的工具集合：每个工具都必须说明用途、风险和回滚路径" : "Windows-focused tools where every item explains purpose, risk, and revert path",
             "dns" => IsZh ? "检测 DNS 延迟、稳定性与安全风险，默认只读不改网络配置" : "Checks DNS latency, stability, and safety risk without changing network settings by default",
             "speed" => IsZh ? "识别运营商与地区后进行稳定测速，默认需要用户确认才消耗流量" : "Identifies ISP and region before stable speed testing; traffic usage requires user consent by default",
             "advisor" => IsZh ? "基于扫描报告的解释、建议与风险说明" : "Explanations, recommendations, and risk notes based on scan reports",
@@ -693,6 +698,11 @@ public partial class MainWindow : Window
         if (page == "dns" && _lastNetworkDiagnostics is not null)
         {
             return GetDnsDiagnosticRows(_lastNetworkDiagnostics);
+        }
+
+        if (page == "toolkit")
+        {
+            return GetToolkitRows();
         }
 
         if (_lastSnapshot is not null)
@@ -1463,6 +1473,20 @@ public partial class MainWindow : Window
             .ToArray();
     }
 
+    private (string Title, string Body, string Badge, string Accent)[] GetToolkitRows()
+    {
+        return ToolkitCatalog.DefaultItems
+            .Take(6)
+            .Select(item => (
+                Title: IsZh ? TranslateToolkitName(item) : item.Name,
+                Body: IsZh
+                    ? $"用途：{TranslateToolkitPurpose(item)} 风险：{TranslateToolkitRisk(item)} 回滚：{TranslateToolkitRevert(item)}"
+                    : $"Purpose: {item.Purpose} Risk: {item.Risk} Revert: {item.RevertPath}",
+                Badge: IsZh ? TranslateToolkitAvailability(item.Availability) : item.Availability.ToString(),
+                Accent: GetToolkitAccent(item.Availability)))
+            .ToArray();
+    }
+
     private string FormatNetworkDiagnosticsSummary(NetworkDiagnosticsReport report)
     {
         if (!IsZh)
@@ -1630,6 +1654,81 @@ public partial class MainWindow : Window
         };
     }
 
+    private string TranslateToolkitName(ToolkitItem item)
+    {
+        return item.Category switch
+        {
+            ToolkitCategory.Startup => "启动项管理",
+            ToolkitCategory.Service => "服务审查",
+            ToolkitCategory.Power => "电源计划中心",
+            ToolkitCategory.Dns => "DNS 中心",
+            ToolkitCategory.Network => "网络测试中心",
+            ToolkitCategory.Storage => "存储清理",
+            ToolkitCategory.Memory => "内存压力检查",
+            ToolkitCategory.Gpu => "GPU 检查",
+            ToolkitCategory.Restore => "恢复中心",
+            ToolkitCategory.Shortcut => "系统快捷入口",
+            _ => item.Name
+        };
+    }
+
+    private string TranslateToolkitPurpose(ToolkitItem item)
+    {
+        return item.Category switch
+        {
+            ToolkitCategory.Startup => "复核启动压力，未来支持禁用与恢复。",
+            ToolkitCategory.Service => "优化前审查服务候选。",
+            ToolkitCategory.Power => "检查当前电源计划，未来支持会话级切换。",
+            ToolkitCategory.Dns => "基准测试当前 DNS 与已验证候选。",
+            ToolkitCategory.Network => "执行延迟、抖动和 DNS 基准测试。",
+            ToolkitCategory.Storage => "删除前预览可清理临时文件。",
+            ToolkitCategory.Memory => "检查高内存进程但不自动关闭。",
+            ToolkitCategory.Gpu => "检查 GPU、驱动、温度与功耗状态。",
+            ToolkitCategory.Restore => "展示未来备份与回滚记录。",
+            ToolkitCategory.Shortcut => "打开常用 Windows 设置入口。",
+            _ => item.Purpose
+        };
+    }
+
+    private string TranslateToolkitRisk(ToolkitItem item)
+    {
+        return item.Category switch
+        {
+            ToolkitCategory.Service => "服务更改可能影响驱动、启动器、更新或反作弊。",
+            ToolkitCategory.Power => "电源更改可能增加发热或耗电。",
+            ToolkitCategory.Dns => "错误 DNS 可能影响浏览或延迟。",
+            ToolkitCategory.Storage => "错误删除可能移除缓存或用户数据。",
+            ToolkitCategory.Memory => "关闭进程可能导致未保存内容丢失。",
+            ToolkitCategory.Gpu => "驱动写入可能影响稳定性。",
+            _ => item.Risk
+        };
+    }
+
+    private string TranslateToolkitRevert(ToolkitItem item)
+    {
+        return item.Category switch
+        {
+            ToolkitCategory.Startup => "恢复原启动项。",
+            ToolkitCategory.Service => "恢复原服务启动方式。",
+            ToolkitCategory.Power => "恢复原电源计划 GUID。",
+            ToolkitCategory.Dns => "恢复原适配器 DNS。",
+            ToolkitCategory.Storage => "仅允许低风险路径，保留删除列表。",
+            ToolkitCategory.Restore => "使用记录的恢复点。",
+            _ => item.RevertPath
+        };
+    }
+
+    private string TranslateToolkitAvailability(ToolkitAvailability availability)
+    {
+        return availability switch
+        {
+            ToolkitAvailability.Ready => "可用",
+            ToolkitAvailability.Preview => "预览",
+            ToolkitAvailability.WindowsOnly => "Windows",
+            _ => "预留"
+        };
+    }
+
     private static string GetNetworkAccent(NetworkQualityLevel qualityLevel)
     {
         return qualityLevel switch
@@ -1733,6 +1832,17 @@ public partial class MainWindow : Window
             OptimizationExecutionStatus.Succeeded => "green",
             OptimizationExecutionStatus.Simulated => "blue",
             OptimizationExecutionStatus.Failed => "red",
+            _ => "amber"
+        };
+    }
+
+    private static string GetToolkitAccent(ToolkitAvailability availability)
+    {
+        return availability switch
+        {
+            ToolkitAvailability.Ready => "green",
+            ToolkitAvailability.Preview => "blue",
+            ToolkitAvailability.WindowsOnly => "amber",
             _ => "amber"
         };
     }

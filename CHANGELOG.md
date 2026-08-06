@@ -4,6 +4,21 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.8.0] - Phase 08 Windows Toolkit Center
+
+### Added
+
+- Toolkit item model.
+- Toolkit catalog.
+- Toolkit Center navigation item.
+- Toolkit Center module page.
+- Purpose, risk, availability, and revert path metadata for toolkit items.
+- Phase 08 completion report.
+
+### Changed
+
+- The app now exposes a Windows-first Toolkit Center without enabling unsafe tool execution.
+
 ## [0.7.0] - Phase 07 Game Boost Mode
 
 ### Added

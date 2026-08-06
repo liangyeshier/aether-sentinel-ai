@@ -284,12 +284,26 @@ Remaining:
 
 ## Phase 08 - Toolkit Layer
 
-Status: Planned
+Status: Completed
 
 Scope:
 
 - Add practical utility modules for startup, services, power plans, DNS, network, storage cleanup, memory pressure, GPU inspection, and restore center.
 - Keep tools grouped, reversible, and explanation-first.
+
+Current deliverables:
+
+- Toolkit item model.
+- Toolkit catalog.
+- Toolkit Center navigation item.
+- Toolkit Center module page.
+- Purpose, risk, availability, and revert path for each tool.
+
+Remaining:
+
+- Management tables.
+- Tool-specific execution.
+- Restore Center persistence.
 
 ## Phase 09 - AI Advisor And History
 

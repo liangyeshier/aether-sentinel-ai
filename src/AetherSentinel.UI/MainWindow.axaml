@@ -114,6 +114,7 @@
             <Button x:Name="NavGameOptimizationButton" Classes="navButton" Click="OnNavigateClicked" Tag="game" Content="Game Optimization" />
             <Button x:Name="NavPerformanceMonitorButton" Classes="navButton" Click="OnNavigateClicked" Tag="monitor" Content="Performance Monitor" />
             <Button x:Name="NavOptimizationCenterButton" Classes="navButton" Click="OnNavigateClicked" Tag="optimization" Content="Optimization Center" />
+            <Button x:Name="NavToolkitButton" Classes="navButton" Click="OnNavigateClicked" Tag="toolkit" Content="Toolkit Center" />
             <Button x:Name="NavDnsOptimizationButton" Classes="navButton" Click="OnNavigateClicked" Tag="dns" Content="DNS Optimization" />
             <Button x:Name="NavNetworkSpeedButton" Classes="navButton" Click="OnNavigateClicked" Tag="speed" Content="Network Speed Test" />
             <Button x:Name="NavAiAdvisorButton" Classes="navButton" Click="OnNavigateClicked" Tag="advisor" Content="AI Advisor" />
