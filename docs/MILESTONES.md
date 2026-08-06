@@ -82,7 +82,7 @@ Deliverables:
 
 ## Milestone 3: Read-only System Intelligence
 
-Status: Planned
+Status: In Progress
 
 Goal:
 
@@ -90,10 +90,13 @@ Build the scanner contracts and platform adapter boundaries for safe system inte
 
 Deliverables:
 
-- Core scanner abstractions.
-- Windows read-only adapter plan.
-- macOS read-only adapter plan.
-- Structured system snapshot model.
+- Core scanner abstractions. Completed.
+- Platform adapter boundary. Completed.
+- Structured system snapshot model. Completed.
+- Network quality, DNS, ISP region, and speed test models. Completed.
+- Network Intelligence planning document. Completed.
+- Windows read-only adapter implementation. Planned.
+- macOS read-only adapter implementation. Planned.
 - No optimization execution.
 
 ## Milestone 4: Low-overhead Performance Monitoring

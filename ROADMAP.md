@@ -54,14 +54,31 @@ Scope:
 
 ## Phase 03 - Read-only System Intelligence
 
-Status: Planned
+Status: In Progress
 
 Scope:
 
 - Build cross-platform scanner contracts in the core layer.
 - Add Windows and macOS adapter boundaries for read-only system information.
-- Collect CPU, GPU, memory, storage, OS, process, startup, network, and DNS state without making system changes.
+- Collect CPU, GPU, memory, storage, OS, process, startup, network, DNS, ISP region, and speed test state without making system changes.
 - Keep background sampling disabled by default to protect idle CPU and memory usage.
+
+Current deliverables:
+
+- Core project added to the solution.
+- Read-only system snapshot models.
+- Platform adapter interface boundary.
+- Network quality, DNS, ISP region, and speed test models.
+- Network Speed Test navigation reservation.
+- Network Intelligence planning document.
+
+Remaining:
+
+- Windows read-only adapter implementation.
+- macOS read-only adapter implementation.
+- Real current DNS detection.
+- Real ISP and region lookup provider.
+- User-approved speed test execution.
 
 ## Phase 04 - Low-overhead Performance Monitoring
 

@@ -29,10 +29,10 @@ Understand -> Analyze -> Explain -> Recommend -> Optimize -> Verify
 Current phase:
 
 ```text
-Phase 02.1 - DNS Optimization Reservation
+Phase 03 - Read-only System Intelligence Foundation
 ```
 
-The current prototype includes the product foundation, runnable desktop shell, clickable module previews, and a reserved DNS Optimization module. Real system scanning and optimization execution are still disabled.
+The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, and core read-only intelligence contracts. Real system scanning and optimization execution are still disabled.
 
 ## Technical Direction
 
@@ -44,7 +44,7 @@ The current prototype includes the product foundation, runnable desktop shell, c
 
 ## Run The Prototype
 
-Phase 02.1 includes a runnable Avalonia desktop shell with clickable module pages and simulated, read-only capability previews.
+Phase 03 includes a runnable Avalonia desktop shell with clickable module pages, simulated read-only capability previews, and the first cross-platform core contracts.
 
 Requirements:
 
@@ -64,7 +64,8 @@ Current prototype scope:
 - Clickable navigation modules.
 - Simulated performance metrics.
 - Simulated AI optimization queue.
-- Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, DNS optimization, AI advisor, history, and settings.
+- Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, DNS optimization, network speed testing, AI advisor, history, and settings.
+- Core models for read-only system snapshots, network quality, DNS candidates, and speed test results.
 
 No real system scanning or optimization is executed in this prototype.
 
@@ -79,10 +80,12 @@ Core documents:
 - `docs/UI_DESIGN_SYSTEM.md`
 - `docs/GITHUB_WORKFLOW.md`
 - `docs/MILESTONES.md`
+- `docs/NETWORK_INTELLIGENCE.md`
 - `docs/PHASE-00-REPORT.md`
 - `docs/PHASE-01-REPORT.md`
 - `docs/PHASE-02-REPORT.md`
 - `docs/PHASE-02-1-REPORT.md`
+- `docs/PHASE-03-REPORT.md`
 
 ## Repository Governance
 

@@ -134,7 +134,7 @@ Responsibilities:
 
 - Collect system information.
 - Normalize platform-specific signals into unified models.
-- Support future scanning for CPU, GPU, memory, storage, OS, processes, drivers, services, startup items, and game-related runtime state.
+- Support future scanning for CPU, GPU, memory, storage, OS, processes, drivers, services, startup items, network state, DNS state, and game-related runtime state.
 
 Output:
 
@@ -178,6 +178,25 @@ Rules:
 - Monitoring must be lightweight.
 - Sampling frequency must be configurable.
 - Long-running monitoring must not degrade user performance.
+
+### Network Intelligence Module
+
+Responsibilities:
+
+- Identify current DNS configuration.
+- Identify network interface state.
+- Estimate China mainland ISP and region when data is available.
+- Benchmark DNS candidates.
+- Run user-approved network speed tests.
+- Measure latency, jitter, packet loss, download, and upload stability.
+
+Rules:
+
+- Must default to read-only detection.
+- Must not change DNS settings without backup, explicit confirmation, verification, and rollback.
+- Must not run full-bandwidth tests without user consent.
+- Must support lightweight latency-only checks.
+- Must keep provider registries replaceable so public, self-hosted, and region-specific nodes can be evaluated independently.
 
 ### AI Intelligence Layer
 

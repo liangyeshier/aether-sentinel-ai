@@ -50,6 +50,7 @@ public partial class MainWindow : Window
         NavPerformanceMonitorButton.Content = zh ? "性能监控" : "Performance Monitor";
         NavOptimizationCenterButton.Content = zh ? "优化中心" : "Optimization Center";
         NavDnsOptimizationButton.Content = zh ? "DNS 优化" : "DNS Optimization";
+        NavNetworkSpeedButton.Content = zh ? "网络测速" : "Network Speed Test";
         NavAiAdvisorButton.Content = zh ? "AI 顾问" : "AI Advisor";
         NavHistoryButton.Content = zh ? "历史记录" : "History";
         NavSettingsButton.Content = zh ? "设置" : "Settings";
@@ -159,6 +160,7 @@ public partial class MainWindow : Window
             (NavPerformanceMonitorButton, "monitor"),
             (NavOptimizationCenterButton, "optimization"),
             (NavDnsOptimizationButton, "dns"),
+            (NavNetworkSpeedButton, "speed"),
             (NavAiAdvisorButton, "advisor"),
             (NavHistoryButton, "history"),
             (NavSettingsButton, "settings")
@@ -181,6 +183,7 @@ public partial class MainWindow : Window
             "monitor" => IsZh ? "性能监控" : "Performance Monitor",
             "optimization" => IsZh ? "优化中心" : "Optimization Center",
             "dns" => IsZh ? "DNS 优化" : "DNS Optimization",
+            "speed" => IsZh ? "网络测速" : "Network Speed Test",
             "advisor" => IsZh ? "AI 顾问" : "AI Advisor",
             "history" => IsZh ? "历史记录" : "History",
             "settings" => IsZh ? "设置" : "Settings",
@@ -197,6 +200,7 @@ public partial class MainWindow : Window
             "monitor" => IsZh ? "按需启动的轻量实时指标与趋势视图" : "On-demand lightweight realtime metrics and trend views",
             "optimization" => IsZh ? "安全优化规则、风险等级、备份与回滚框架" : "Safe optimization rules, risk levels, backup, and rollback framework",
             "dns" => IsZh ? "检测 DNS 延迟、稳定性与安全风险，默认只读不改网络配置" : "Checks DNS latency, stability, and safety risk without changing network settings by default",
+            "speed" => IsZh ? "识别运营商与地区后进行稳定测速，默认需要用户确认才消耗流量" : "Identifies ISP and region before stable speed testing; traffic usage requires user consent by default",
             "advisor" => IsZh ? "基于扫描报告的解释、建议与风险说明" : "Explanations, recommendations, and risk notes based on scan reports",
             "history" => IsZh ? "扫描、建议、优化和回滚记录" : "Scan, recommendation, optimization, and rollback history",
             "settings" => IsZh ? "语言、性能模式、隐私与更新设置" : "Language, performance mode, privacy, and update settings",
@@ -271,6 +275,13 @@ public partial class MainWindow : Window
                     ("安全 DNS 候选", "360 安全 DNS 可列入候选，但必须确认官方公开地址与使用条款。", "候选", "amber"),
                     ("备份与回滚", "真实切换 DNS 前必须备份原配置，并支持一键恢复。", "必需", "green")
                 },
+                "speed" => new[]
+                {
+                    ("运营商与地区识别", "优先使用离线 IP 库识别中国大陆省市与运营商，避免依赖单一公网接口。", "只读", "blue"),
+                    ("测速服务器选择", "按地区、运营商和延迟选择候选节点，未来支持自建 LibreSpeed 节点。", "匹配", "green"),
+                    ("速度与稳定性", "同时记录下载、上传、延迟、抖动和失败率，避免只看峰值带宽。", "综合", "amber"),
+                    ("流量保护", "完整测速会消耗流量，必须用户确认，并提供轻量 Ping 模式。", "低占用", "green")
+                },
                 "advisor" => new[]
                 {
                     ("系统报告摘要", "AI 只读取扫描报告和本地结构化结果，不直接控制系统。", "解释", "blue"),
@@ -332,6 +343,13 @@ public partial class MainWindow : Window
                 ("Latency And Stability", "Benchmarks candidate DNS providers across lookup time, failure rate, and jitter.", "Benchmark", "green"),
                 ("Secure DNS Candidate", "360 Secure DNS can be considered after official public endpoints and usage terms are confirmed.", "Candidate", "amber"),
                 ("Backup And Rollback", "Real DNS switching must back up the original configuration and support one-click restore.", "Required", "green")
+            },
+            "speed" => new[]
+            {
+                ("ISP And Region", "Prefer offline IP data to identify China mainland province, city, and ISP without depending on one public API.", "Read-only", "blue"),
+                ("Server Selection", "Choose candidate nodes by region, ISP, and latency; future self-hosted LibreSpeed nodes are supported.", "Match", "green"),
+                ("Speed And Stability", "Record download, upload, latency, jitter, and failure rate instead of peak bandwidth only.", "Balanced", "amber"),
+                ("Traffic Guard", "Full tests consume data, require user consent, and keep a lightweight ping-only mode available.", "Low load", "green")
             },
             "advisor" => new[]
             {

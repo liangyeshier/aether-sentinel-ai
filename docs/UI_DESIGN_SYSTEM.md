@@ -26,9 +26,10 @@ Main navigation:
 4. Performance Monitor
 5. Optimization Center
 6. DNS Optimization
-7. AI Advisor
-8. History
-9. Settings
+7. Network Speed Test
+8. AI Advisor
+9. History
+10. Settings
 
 ## Dashboard Design
 

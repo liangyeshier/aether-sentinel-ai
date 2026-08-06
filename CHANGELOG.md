@@ -4,6 +4,23 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.0] - Phase 03 Read-only System Intelligence Foundation
+
+### Added
+
+- `AetherSentinel.Core` project.
+- Read-only system snapshot models.
+- Platform system adapter boundary.
+- Network quality, ISP region, DNS candidate, and speed test models.
+- Network Speed Test left navigation module.
+- Simplified Chinese and English Network Speed Test page copy.
+- Network Intelligence planning document.
+
+### Changed
+
+- README and roadmap now describe Phase 03 as in progress.
+- Architecture now includes a dedicated Network Intelligence module.
+
 ## [0.2.1] - Phase 02.1 DNS Optimization Reservation
 
 ### Added
