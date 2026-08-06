@@ -4,6 +4,22 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.9] - Phase 03.5 Windows Read-only Adapter Expansion
+
+### Added
+
+- Startup item snapshot model.
+- Active power plan snapshot model.
+- Game process candidate snapshot model.
+- Windows CPU, GPU, physical memory, startup item, and power plan read paths.
+- Game-related process candidate detection.
+- PC Intelligence and Game Optimization live rows for the new read-only fields.
+- Phase 03.5 completion report.
+
+### Changed
+
+- System snapshots now carry Windows-first optimization context while preserving macOS fallback behavior.
+
 ## [0.3.8] - Phase 03.4 Network Intelligence Activation
 
 ### Added

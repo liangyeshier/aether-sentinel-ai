@@ -241,9 +241,9 @@ public partial class MainWindow : Window
         CpuStatusText.Text = IsZh ? "CPU 已识别" : "CPU identified";
         CpuStatusText.Foreground = new SolidColorBrush(Color.Parse("#A8B3C2"));
 
-        GpuMetricText.Text = IsZh ? "预留" : "Next";
-        GpuStatusText.Text = IsZh ? "GPU 适配待接入" : "GPU adapter pending";
-        GpuStatusText.Foreground = new SolidColorBrush(Color.Parse("#F2B84B"));
+        GpuMetricText.Text = IsZh ? "只读" : "Read";
+        GpuStatusText.Text = CompactText(snapshot.Hardware.GpuName, 24);
+        GpuStatusText.Foreground = new SolidColorBrush(Color.Parse("#A8B3C2"));
 
         MemoryMetricText.Text = memoryPercent <= 0 ? "--" : $"{memoryPercent:0}%";
         MemoryStatusText.Text = IsZh
@@ -657,8 +657,16 @@ public partial class MainWindow : Window
                 {
                     ("系统信息", $"{snapshot.OperatingSystem.Name} / {snapshot.OperatingSystem.Architecture} / {snapshot.OperatingSystem.DeviceName}", "真实", "green"),
                     ("CPU", snapshot.Hardware.CpuName, "只读", "blue"),
-                    ("内存", $"{FormatMb(snapshot.Hardware.MemoryUsedMb)} 已用 / {FormatMb(snapshot.Hardware.MemoryTotalMb)} 总量。", "真实", "green"),
-                    ("占用最高进程", topProcess is null ? "未读取到进程列表。" : $"{topProcess.Name} · PID {topProcess.ProcessId} · {FormatMb(topProcess.MemoryMb)}", "进程", "amber")
+                    ("GPU", snapshot.Hardware.GpuName, "只读", "blue"),
+                    ("启动项", snapshot.StartupItems.Count == 0 ? "当前平台未读取到 Windows 启动项，需在 Windows 上验证。" : $"已读取 {snapshot.StartupItems.Count} 个启动项，{snapshot.StartupItems.Count(item => item.ImpactLevel is StartupImpactLevel.High or StartupImpactLevel.Medium)} 个需要复核。", "Windows", snapshot.StartupItems.Count == 0 ? "amber" : "green"),
+                    ("电源计划", $"{snapshot.PowerPlan.Name} · {snapshot.PowerPlan.Source}", "只读", snapshot.PowerPlan.IsHighPerformanceCandidate ? "green" : "amber")
+                },
+                "game" => new[]
+                {
+                    ("游戏候选进程", snapshot.GameProcessCandidates.Count == 0 ? "未识别到游戏、启动器、反作弊或录制工具候选。" : $"识别到 {snapshot.GameProcessCandidates.Count} 个候选：{string.Join(", ", snapshot.GameProcessCandidates.Take(3).Select(candidate => candidate.Name))}", "只读", snapshot.GameProcessCandidates.Count == 0 ? "amber" : "green"),
+                    ("候选角色", snapshot.GameProcessCandidates.Count == 0 ? "等待 Windows 游戏环境验证。" : string.Join(" / ", snapshot.GameProcessCandidates.GroupBy(candidate => candidate.Role).Select(group => $"{TranslateGameRole(group.Key)} {group.Count()}")), "分类", "blue"),
+                    ("启动器边界", "Steam、Epic、Battle.net、Riot、WeGame 会先作为启动器候选，不直接当作游戏本体优化。", "安全", "green"),
+                    ("反作弊边界", "Easy Anti-Cheat、BattlEye 等候选只做识别和保护，不做压制或规避。", "保护", "amber")
                 },
                 "dns" => new[]
                 {
@@ -698,8 +706,16 @@ public partial class MainWindow : Window
             {
                 ("System", $"{snapshot.OperatingSystem.Name} / {snapshot.OperatingSystem.Architecture} / {snapshot.OperatingSystem.DeviceName}", "Live", "green"),
                 ("CPU", snapshot.Hardware.CpuName, "Read-only", "blue"),
-                ("Memory", $"{FormatMb(snapshot.Hardware.MemoryUsedMb)} used / {FormatMb(snapshot.Hardware.MemoryTotalMb)} total.", "Live", "green"),
-                ("Top Process", topProcess is null ? "No process list was captured." : $"{topProcess.Name} · PID {topProcess.ProcessId} · {FormatMb(topProcess.MemoryMb)}", "Process", "amber")
+                ("GPU", snapshot.Hardware.GpuName, "Read-only", "blue"),
+                ("Startup Items", snapshot.StartupItems.Count == 0 ? "No Windows startup items were captured on this platform; validate on Windows." : $"Captured {snapshot.StartupItems.Count} startup entries; {snapshot.StartupItems.Count(item => item.ImpactLevel is StartupImpactLevel.High or StartupImpactLevel.Medium)} need review.", "Windows", snapshot.StartupItems.Count == 0 ? "amber" : "green"),
+                ("Power Plan", $"{snapshot.PowerPlan.Name} · {snapshot.PowerPlan.Source}", "Read-only", snapshot.PowerPlan.IsHighPerformanceCandidate ? "green" : "amber")
+            },
+            "game" => new[]
+            {
+                ("Game Candidates", snapshot.GameProcessCandidates.Count == 0 ? "No game, launcher, anti-cheat, or capture-tool candidate was detected." : $"Detected {snapshot.GameProcessCandidates.Count}: {string.Join(", ", snapshot.GameProcessCandidates.Take(3).Select(candidate => candidate.Name))}", "Read-only", snapshot.GameProcessCandidates.Count == 0 ? "amber" : "green"),
+                ("Candidate Roles", snapshot.GameProcessCandidates.Count == 0 ? "Waiting for Windows gaming environment validation." : string.Join(" / ", snapshot.GameProcessCandidates.GroupBy(candidate => candidate.Role).Select(group => $"{group.Key} {group.Count()}")), "Classify", "blue"),
+                ("Launcher Boundary", "Steam, Epic, Battle.net, Riot, and WeGame are treated as launcher candidates before game-body optimization.", "Safe", "green"),
+                ("Anti-cheat Boundary", "Easy Anti-Cheat and BattlEye candidates are identified and protected, never bypassed.", "Protect", "amber")
             },
             "dns" => new[]
             {
@@ -761,6 +777,34 @@ public partial class MainWindow : Window
             "network" => "网络",
             _ => factor.Title
         };
+    }
+
+    private string TranslateGameRole(GameProcessRole role)
+    {
+        if (!IsZh)
+        {
+            return role.ToString();
+        }
+
+        return role switch
+        {
+            GameProcessRole.Game => "游戏",
+            GameProcessRole.Launcher => "启动器",
+            GameProcessRole.AntiCheat => "反作弊",
+            GameProcessRole.Updater => "更新器",
+            GameProcessRole.CaptureTool => "录制工具",
+            _ => "未知"
+        };
+    }
+
+    private static string CompactText(string value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length <= maxLength)
+        {
+            return value;
+        }
+
+        return $"{value[..Math.Max(0, maxLength - 1)]}…";
     }
 
     private static string GetScoreAccent(int score)

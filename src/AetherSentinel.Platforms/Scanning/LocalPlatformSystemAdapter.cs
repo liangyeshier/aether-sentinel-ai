@@ -16,7 +16,7 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
         return ValueTask.FromResult(new PlatformCapabilitySet(
             CanReadHardware: true,
             CanReadProcesses: true,
-            CanReadStartupItems: false,
+            CanReadStartupItems: OperatingSystem.IsWindows(),
             CanReadNetworkInterfaces: true,
             CanReadDnsConfiguration: OperatingSystem.IsMacOS() || OperatingSystem.IsWindows(),
             CanRunNetworkSpeedTest: false,
@@ -33,7 +33,7 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
         var storage = CreateStorageSnapshots();
         var hardware = new HardwareSnapshot(
             CpuName: await ReadCpuNameAsync(cancellationToken),
-            GpuName: "Read-only adapter pending",
+            GpuName: await ReadGpuNameAsync(cancellationToken),
             MemoryTotalMb: await ReadTotalMemoryMbAsync(cancellationToken),
             MemoryUsedMb: await ReadUsedMemoryMbAsync(cancellationToken),
             Storage: storage);
@@ -41,6 +41,11 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
         var processes = request.IncludeProcesses
             ? CreateTopProcessSnapshots()
             : [];
+        var startupItems = OperatingSystem.IsWindows()
+            ? await ReadWindowsStartupItemsAsync(cancellationToken)
+            : [];
+        var powerPlan = await ReadPowerPlanAsync(cancellationToken);
+        var gameCandidates = DetectGameProcessCandidates(processes);
 
         var network = request.IncludeNetwork
             ? await CreateNetworkSnapshotAsync(request.IncludeDns, cancellationToken)
@@ -53,6 +58,9 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
             OperatingSystem: operatingSystem,
             Hardware: hardware,
             TopProcesses: processes,
+            StartupItems: startupItems,
+            PowerPlan: powerPlan,
+            GameProcessCandidates: gameCandidates,
             Network: network,
             Insights: insights);
     }
@@ -220,7 +228,55 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
             }
         }
 
+        if (OperatingSystem.IsWindows())
+        {
+            var value = await RunCommandAsync(
+                "powershell",
+                cancellationToken,
+                "-NoProfile",
+                "-Command",
+                "(Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name)");
+
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value.Trim();
+            }
+        }
+
         return RuntimeInformation.ProcessArchitecture.ToString();
+    }
+
+    private static async ValueTask<string> ReadGpuNameAsync(CancellationToken cancellationToken)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            var value = await RunCommandAsync(
+                "powershell",
+                cancellationToken,
+                "-NoProfile",
+                "-Command",
+                "(Get-CimInstance Win32_VideoController | Select-Object -First 1 -ExpandProperty Name)");
+
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value.Trim();
+            }
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            var output = await RunCommandAsync("/usr/sbin/system_profiler", cancellationToken, "SPDisplaysDataType");
+            var chipsetLine = output
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .FirstOrDefault(line => line.StartsWith("Chipset Model:", StringComparison.OrdinalIgnoreCase));
+
+            if (chipsetLine is not null)
+            {
+                return chipsetLine.Split(':', 2, StringSplitOptions.TrimEntries).ElementAtOrDefault(1) ?? "Unknown GPU";
+            }
+        }
+
+        return "Read-only adapter pending";
     }
 
     private static async ValueTask<long> ReadTotalMemoryMbAsync(CancellationToken cancellationToken)
@@ -228,6 +284,21 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
         if (OperatingSystem.IsMacOS())
         {
             var value = await RunCommandAsync("/usr/sbin/sysctl", cancellationToken, "-n", "hw.memsize");
+            if (long.TryParse(value.Trim(), out var bytes))
+            {
+                return bytes / 1024 / 1024;
+            }
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            var value = await RunCommandAsync(
+                "powershell",
+                cancellationToken,
+                "-NoProfile",
+                "-Command",
+                "([int64](Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory)");
+
             if (long.TryParse(value.Trim(), out var bytes))
             {
                 return bytes / 1024 / 1024;
@@ -254,7 +325,151 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
             }
         }
 
+        if (OperatingSystem.IsWindows())
+        {
+            var value = await RunCommandAsync(
+                "powershell",
+                cancellationToken,
+                "-NoProfile",
+                "-Command",
+                "$os = Get-CimInstance Win32_OperatingSystem; [int64](($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) * 1024)");
+
+            if (long.TryParse(value.Trim(), out var bytes))
+            {
+                return bytes / 1024 / 1024;
+            }
+        }
+
         return GC.GetTotalMemory(forceFullCollection: false) / 1024 / 1024;
+    }
+
+    private static async ValueTask<IReadOnlyList<StartupItemSnapshot>> ReadWindowsStartupItemsAsync(CancellationToken cancellationToken)
+    {
+        var output = await RunCommandAsync(
+            "powershell",
+            cancellationToken,
+            "-NoProfile",
+            "-Command",
+            "Get-CimInstance Win32_StartupCommand | Select-Object -First 12 Name,Command,Location,User | ForEach-Object { \"$($_.Name)`t$($_.Command)`t$($_.Location)`t$($_.User)\" }");
+
+        return output
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(line => line.Split('\t'))
+            .Where(parts => parts.Length >= 4)
+            .Select(parts => new StartupItemSnapshot(
+                Name: parts[0],
+                Command: parts[1],
+                Location: parts[2],
+                User: parts[3],
+                ImpactLevel: EstimateStartupImpact(parts[1])))
+            .ToArray();
+    }
+
+    private static StartupImpactLevel EstimateStartupImpact(string command)
+    {
+        var normalized = command.ToLowerInvariant();
+        if (normalized.Contains("updater") || normalized.Contains("update") || normalized.Contains("helper"))
+        {
+            return StartupImpactLevel.Medium;
+        }
+
+        if (normalized.Contains("game") || normalized.Contains("launcher") || normalized.Contains("overlay"))
+        {
+            return StartupImpactLevel.High;
+        }
+
+        return string.IsNullOrWhiteSpace(command)
+            ? StartupImpactLevel.Unknown
+            : StartupImpactLevel.Low;
+    }
+
+    private static async ValueTask<PowerPlanSnapshot> ReadPowerPlanAsync(CancellationToken cancellationToken)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return new PowerPlanSnapshot(
+                Name: "Not applicable",
+                Identifier: "n/a",
+                Source: "Non-Windows fallback",
+                IsHighPerformanceCandidate: false);
+        }
+
+        var output = await RunCommandAsync("powercfg", cancellationToken, "/getactivescheme");
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return new PowerPlanSnapshot(
+                Name: "Unknown",
+                Identifier: "Unknown",
+                Source: "powercfg",
+                IsHighPerformanceCandidate: false);
+        }
+
+        var identifier = "Unknown";
+        var name = output.Trim();
+        var colonIndex = output.IndexOf(':');
+        var openParenIndex = output.IndexOf('(');
+        var closeParenIndex = output.IndexOf(')');
+
+        if (colonIndex >= 0 && openParenIndex > colonIndex)
+        {
+            identifier = output[(colonIndex + 1)..openParenIndex].Trim();
+        }
+
+        if (openParenIndex >= 0 && closeParenIndex > openParenIndex)
+        {
+            name = output[(openParenIndex + 1)..closeParenIndex].Trim();
+        }
+
+        return new PowerPlanSnapshot(
+            Name: name,
+            Identifier: identifier,
+            Source: "powercfg",
+            IsHighPerformanceCandidate: name.Contains("High performance", StringComparison.OrdinalIgnoreCase) ||
+                                        name.Contains("Ultimate Performance", StringComparison.OrdinalIgnoreCase) ||
+                                        name.Contains("高性能", StringComparison.OrdinalIgnoreCase) ||
+                                        name.Contains("卓越性能", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static IReadOnlyList<GameProcessCandidateSnapshot> DetectGameProcessCandidates(
+        IReadOnlyList<ProcessSnapshot> processes)
+    {
+        return processes
+            .Select(TryCreateGameCandidate)
+            .OfType<GameProcessCandidateSnapshot>()
+            .Take(8)
+            .ToArray();
+    }
+
+    private static GameProcessCandidateSnapshot? TryCreateGameCandidate(ProcessSnapshot process)
+    {
+        var name = process.Name.ToLowerInvariant();
+        var role = name switch
+        {
+            var value when value.Contains("steam") => GameProcessRole.Launcher,
+            var value when value.Contains("epic") => GameProcessRole.Launcher,
+            var value when value.Contains("battle.net") => GameProcessRole.Launcher,
+            var value when value.Contains("riot") => GameProcessRole.Launcher,
+            var value when value.Contains("wegame") => GameProcessRole.Launcher,
+            var value when value.Contains("easyanticheat") => GameProcessRole.AntiCheat,
+            var value when value.Contains("battleye") => GameProcessRole.AntiCheat,
+            var value when value.Contains("obs") => GameProcessRole.CaptureTool,
+            var value when value.Contains("game") || value.Contains("league") || value.Contains("valorant") => GameProcessRole.Game,
+            _ => GameProcessRole.Unknown
+        };
+
+        if (role == GameProcessRole.Unknown)
+        {
+            return null;
+        }
+
+        return new GameProcessCandidateSnapshot(
+            Name: process.Name,
+            ProcessId: process.ProcessId,
+            DetectionReason: role == GameProcessRole.Game
+                ? "Process name matches common game pattern."
+                : $"Process name matches {role} pattern.",
+            Role: role,
+            Confidence: role == GameProcessRole.Game ? 0.65 : 0.75);
     }
 
     private static long ParseMacOsPageSize(string vmStatOutput)

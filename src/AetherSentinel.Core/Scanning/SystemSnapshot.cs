@@ -5,6 +5,9 @@ public sealed record SystemSnapshot(
     OperatingSystemSnapshot OperatingSystem,
     HardwareSnapshot Hardware,
     IReadOnlyList<ProcessSnapshot> TopProcesses,
+    IReadOnlyList<StartupItemSnapshot> StartupItems,
+    PowerPlanSnapshot PowerPlan,
+    IReadOnlyList<GameProcessCandidateSnapshot> GameProcessCandidates,
     NetworkSnapshot Network,
     IReadOnlyList<SystemInsight> Insights);
 
@@ -33,6 +36,26 @@ public sealed record ProcessSnapshot(
     double CpuPercent,
     long MemoryMb,
     ProcessImpactLevel ImpactLevel);
+
+public sealed record StartupItemSnapshot(
+    string Name,
+    string Command,
+    string Location,
+    string User,
+    StartupImpactLevel ImpactLevel);
+
+public sealed record PowerPlanSnapshot(
+    string Name,
+    string Identifier,
+    string Source,
+    bool IsHighPerformanceCandidate);
+
+public sealed record GameProcessCandidateSnapshot(
+    string Name,
+    int ProcessId,
+    string DetectionReason,
+    GameProcessRole Role,
+    double Confidence);
 
 public sealed record NetworkSnapshot(
     string PrimaryInterfaceName,
@@ -66,6 +89,24 @@ public enum ProcessImpactLevel
     Low,
     Medium,
     High
+}
+
+public enum StartupImpactLevel
+{
+    Unknown,
+    Low,
+    Medium,
+    High
+}
+
+public enum GameProcessRole
+{
+    Unknown,
+    Game,
+    Launcher,
+    AntiCheat,
+    Updater,
+    CaptureTool
 }
 
 public enum NetworkQualityLevel

@@ -79,10 +79,10 @@ Current deliverables:
 
 Remaining:
 
-- Windows read-only adapter implementation.
-- macOS read-only adapter expansion for GPU, startup items, and richer CPU sampling.
 - Real ISP and region lookup provider.
 - User-approved speed test execution.
+- CPU usage sampling.
+- GPU load and temperature.
 
 ## Phase 03.3 - Competitive Feature Synthesis
 
@@ -131,7 +131,30 @@ Remaining:
 - China mainland ISP and region lookup with confidence levels.
 - Explicit full speed tests.
 
-## Phase 03.5 - Game Session Intelligence
+## Phase 03.5 - Windows Read-only Adapter Expansion
+
+Status: Completed
+
+Scope:
+
+- Expand Windows read-only scanner paths.
+- Add startup item, active power plan, GPU, and game process candidate context.
+- Preserve macOS fallback behavior for development validation.
+
+Current deliverables:
+
+- Windows CPU name, GPU name, physical memory, startup items, and active power plan read paths.
+- Startup item, power plan, and game process candidate snapshot models.
+- PC Intelligence and Game Optimization live rows for Windows-first read-only fields.
+- macOS fallback validation.
+
+Remaining:
+
+- Windows real-device validation.
+- CPU usage sampling.
+- Richer GPU and driver data.
+
+## Phase 03.6 - Game Session Intelligence
 
 Status: Planned
 
