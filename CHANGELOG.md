@@ -4,6 +4,20 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.6.0] - Phase 06 Safe Optimization Execution
+
+### Added
+
+- Optimization execution request and report models.
+- Execution result and restore point models.
+- Guarded optimization execution engine.
+- Optimization Center safe simulation action and result cards.
+- Phase 06 completion report.
+
+### Changed
+
+- Optimization Center can now simulate safe execution from a Dry Run report while keeping real system writes disabled.
+
 ## [0.5.0] - Phase 05 Optimization Rule Engine Dry Run
 
 ### Added

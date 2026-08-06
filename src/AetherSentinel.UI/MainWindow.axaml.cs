@@ -32,6 +32,7 @@ public partial class MainWindow : Window
     private readonly IGameSessionAnalyzer _gameSessionAnalyzer = new GameSessionAnalyzer();
     private readonly ILowOverheadMonitor _lowOverheadMonitor = new LocalLowOverheadMonitor();
     private readonly IOptimizationDryRunEngine _optimizationDryRunEngine = new OptimizationDryRunEngine();
+    private readonly IOptimizationExecutionEngine _optimizationExecutionEngine = new OptimizationExecutionEngine();
     private readonly List<GameLibraryEntry> _gameLibrary = LoadGameLibrary().ToList();
     private SystemSnapshot? _lastSnapshot;
     private PerformanceAnalysisReport? _lastReport;
@@ -39,6 +40,7 @@ public partial class MainWindow : Window
     private GameSessionAnalysis? _lastGameSessionAnalysis;
     private MonitorSnapshot? _lastMonitorSnapshot;
     private OptimizationDryRunReport? _lastDryRunReport;
+    private OptimizationExecutionReport? _lastExecutionReport;
     private TextBlock? _networkSpeedStatusText;
     private TextBlock? _gameSessionStatusText;
     private TextBlock? _monitorStatusText;
@@ -264,6 +266,25 @@ public partial class MainWindow : Window
 
         CurrentStateBodyTitleText.Text = IsZh ? "Dry Run 已生成" : "Dry Run generated";
         CurrentStateBodyText.Text = FormatDryRunSummary(_lastDryRunReport);
+        NavigateTo("optimization");
+    }
+
+    private void OnSimulateExecutionClicked(object? sender, RoutedEventArgs e)
+    {
+        _lastDryRunReport ??= _optimizationDryRunEngine.Generate(
+            _lastSnapshot,
+            _lastNetworkDiagnostics,
+            _lastGameSessionAnalysis);
+
+        _lastExecutionReport = _optimizationExecutionEngine.Execute(
+            new OptimizationExecutionRequest(
+                DryRunReport: _lastDryRunReport,
+                Mode: OptimizationExecutionMode.Simulated,
+                AllowSystemChanges: false,
+                UserConsentToken: "local-ui-simulated-consent"));
+
+        CurrentStateBodyTitleText.Text = IsZh ? "安全执行模拟完成" : "Safe execution simulation complete";
+        CurrentStateBodyText.Text = FormatExecutionSummary(_lastExecutionReport);
         NavigateTo("optimization");
     }
 
@@ -633,6 +654,11 @@ public partial class MainWindow : Window
         if (page == "monitor" && _lastMonitorSnapshot is not null)
         {
             return GetMonitorRows(_lastMonitorSnapshot);
+        }
+
+        if (page == "optimization" && _lastExecutionReport is not null)
+        {
+            return GetExecutionRows(_lastExecutionReport);
         }
 
         if (page == "optimization" && _lastDryRunReport is not null)
@@ -1191,7 +1217,7 @@ public partial class MainWindow : Window
             TextWrapping = TextWrapping.Wrap
         };
 
-        var button = new Button
+        var dryRunButton = new Button
         {
             Classes = { "primary" },
             Content = IsZh ? "生成 Dry Run" : "Generate Dry Run",
@@ -1199,8 +1225,25 @@ public partial class MainWindow : Window
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center
         };
-        button.Click += OnGenerateDryRunClicked;
-        Grid.SetColumn(button, 1);
+        dryRunButton.Click += OnGenerateDryRunClicked;
+
+        var simulateButton = new Button
+        {
+            Classes = { "secondary" },
+            Content = IsZh ? "安全模拟" : "Simulate",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        simulateButton.Click += OnSimulateExecutionClicked;
+
+        var buttonPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Children = { dryRunButton, simulateButton }
+        };
+        Grid.SetColumn(buttonPanel, 1);
 
         return new Border
         {
@@ -1226,7 +1269,7 @@ public partial class MainWindow : Window
                             _dryRunStatusText
                         }
                     },
-                    button
+                    buttonPanel
                 }
             }
         };
@@ -1358,6 +1401,20 @@ public partial class MainWindow : Window
             .ToArray();
     }
 
+    private (string Title, string Body, string Badge, string Accent)[] GetExecutionRows(OptimizationExecutionReport report)
+    {
+        return report.Results
+            .Take(4)
+            .Select(result => (
+                Title: IsZh ? TranslateExecutionRuleName(result.RuleName) : result.RuleName,
+                Body: IsZh
+                    ? $"{TranslateExecutionStatus(result.Status)}：{result.Message} 验证：{result.VerificationResult} 回滚：{result.RollbackState}"
+                    : $"{result.Status}: {result.Message} Verification: {result.VerificationResult} Rollback: {result.RollbackState}",
+                Badge: IsZh ? TranslateExecutionStatus(result.Status) : result.Status.ToString(),
+                Accent: GetExecutionAccent(result.Status)))
+            .ToArray();
+    }
+
     private string FormatNetworkDiagnosticsSummary(NetworkDiagnosticsReport report)
     {
         if (!IsZh)
@@ -1466,6 +1523,36 @@ public partial class MainWindow : Window
         };
     }
 
+    private string TranslateExecutionRuleName(string ruleName)
+    {
+        return ruleName switch
+        {
+            "Switch to measured DNS candidate" => "DNS 候选切换",
+            "Disable reviewed startup item" => "启动项复核",
+            "Switch game-session power plan" => "游戏电源计划",
+            "Review background pressure" => "后台压力复核",
+            "Preview temporary cleanup" => "临时清理预览",
+            "Enable game focus notification policy" => "游戏专注策略",
+            _ => ruleName
+        };
+    }
+
+    private string TranslateExecutionStatus(OptimizationExecutionStatus status)
+    {
+        if (!IsZh)
+        {
+            return status.ToString();
+        }
+
+        return status switch
+        {
+            OptimizationExecutionStatus.Simulated => "已模拟",
+            OptimizationExecutionStatus.Succeeded => "已成功",
+            OptimizationExecutionStatus.Failed => "失败",
+            _ => "已阻止"
+        };
+    }
+
     private static string GetNetworkAccent(NetworkQualityLevel qualityLevel)
     {
         return qualityLevel switch
@@ -1530,12 +1617,35 @@ public partial class MainWindow : Window
         return $"已生成 {report.Previews.Count} 条规则预览：{report.EligibleCount} 条可预演，{report.BlockedCount} 条被阻止；不会执行系统修改。";
     }
 
+    private string FormatExecutionSummary(OptimizationExecutionReport report)
+    {
+        if (!IsZh)
+        {
+            return report.Summary;
+        }
+
+        var simulated = report.Results.Count(result => result.Status == OptimizationExecutionStatus.Simulated);
+        var blocked = report.Results.Count(result => result.Status == OptimizationExecutionStatus.Blocked);
+        return $"安全执行模拟完成：{simulated} 条已模拟，{blocked} 条被安全门阻止，真实系统写入仍禁用。";
+    }
+
     private static string GetPreviewAccent(OptimizationRulePreviewState state)
     {
         return state switch
         {
             OptimizationRulePreviewState.Eligible => "green",
             OptimizationRulePreviewState.Blocked => "red",
+            _ => "amber"
+        };
+    }
+
+    private static string GetExecutionAccent(OptimizationExecutionStatus status)
+    {
+        return status switch
+        {
+            OptimizationExecutionStatus.Succeeded => "green",
+            OptimizationExecutionStatus.Simulated => "blue",
+            OptimizationExecutionStatus.Failed => "red",
             _ => "amber"
         };
     }
