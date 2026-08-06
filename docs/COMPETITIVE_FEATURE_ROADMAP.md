@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document merges the useful product ideas found in BoosterX, Pavise, and LaoYing Toolkit into a safe AETHER SENTINEL AI upgrade roadmap.
+This document merges the useful product ideas found in BoosterX and Pavise into a safe AETHER SENTINEL AI upgrade roadmap.
 
-The goal is feature synthesis, not code copying.
+The active Windows-first execution roadmap is maintained in `docs/WINDOWS_FIRST_UPGRADE_ROADMAP.md`.
 
 ## Source Status
 
@@ -62,20 +62,21 @@ Observed product direction:
 
 License boundary:
 
-The license allows free use, modification, learning, and free distribution, but prohibits selling the software or derivatives. AETHER SENTINEL AI must not copy Pavise source code, UI, name, icon, or derivative implementation unless a future legal review confirms a compatible path.
+The license allows free use, modification, learning, and free distribution, but prohibits selling the software or derivatives.
 
-Allowed use:
+Allowed use for AETHER:
 
 - Product learning.
 - Architecture comparison.
 - Independent reimplementation of general ideas.
 - Feature-level inspiration with separate design and code.
+- Direct code reuse only for free/open AETHER modules that fully preserve Pavise license obligations.
 
 ### LaoYing Toolkit
 
 Status:
 
-Public references found, but authoritative source repository and license are not confirmed.
+Removed from active planning.
 
 Observed public references:
 
@@ -95,9 +96,9 @@ Observed feature direction from public snippets:
 - Service optimization.
 - NVIDIA preset tuning.
 
-Reuse rule:
+Decision:
 
-Treat LaoYing Toolkit only as a feature-category reference until an official source repository, license, and documentation are verified.
+Do not include LaoYing Toolkit in the active roadmap unless an official source repository and compatible license are confirmed later.
 
 ## Competitive Synthesis
 
@@ -115,13 +116,6 @@ Pavise contributes:
 - No-injection safety boundary.
 - Reversible session-level optimization.
 - Session reports and verification.
-
-LaoYing Toolkit contributes:
-
-- Practical Windows tuning categories.
-- CPU scheduling and core layout concepts.
-- GPU preset and DLSS-focused user demand.
-- Startup, service, and power-plan tool modules.
 
 AETHER SENTINEL AI must combine these into:
 

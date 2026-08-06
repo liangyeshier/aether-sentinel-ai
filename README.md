@@ -32,7 +32,7 @@ Current phase:
 Phase 03 - Read-only System Intelligence Foundation
 ```
 
-The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, core read-only intelligence contracts, first local read-only scanning, and a competitive feature roadmap aligned against BoosterX, Pavise, and LaoYing-style utility categories. Optimization execution is still disabled.
+The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, core read-only intelligence contracts, first local read-only scanning, and a Windows-first upgrade roadmap aligned against BoosterX and Pavise. Optimization execution is still disabled.
 
 ## Technical Direction
 
@@ -70,6 +70,7 @@ Current prototype scope:
 - Read-only performance score, optimization potential, and recommendation generation.
 - Verified 360 Secure DNS provider registry entry.
 - Competitive upgrade roadmap covering Network Intelligence, Game Session Intelligence, low-overhead monitoring, safe rule dry-runs, reversible optimization execution, Game Boost Mode, and toolkit modules.
+- Windows-first implementation strategy with macOS kept as the current development and validation environment.
 
 No optimization is executed in this prototype.
 
@@ -87,6 +88,7 @@ Core documents:
 - `docs/DNS_PROVIDER_REGISTRY.md`
 - `docs/NETWORK_INTELLIGENCE.md`
 - `docs/COMPETITIVE_FEATURE_ROADMAP.md`
+- `docs/WINDOWS_FIRST_UPGRADE_ROADMAP.md`
 - `docs/PHASE-00-REPORT.md`
 - `docs/PHASE-01-REPORT.md`
 - `docs/PHASE-02-REPORT.md`

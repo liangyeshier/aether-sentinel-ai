@@ -4,6 +4,19 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.7] - Windows-first Upgrade Roadmap
+
+### Added
+
+- Windows-first upgrade roadmap focused on BoosterX commercial alignment and Pavise free/open feature direction.
+- Platform strategy that treats Windows as the primary optimization target and macOS as the current development and validation environment.
+- Pavise reuse boundary for free/open modules, license preservation, provenance tracking, and future commercial separation.
+
+### Changed
+
+- LaoYing Toolkit is removed from active planning until an official source repository and compatible license are confirmed.
+- README and roadmap now reference the Windows-first upgrade strategy.
+
 ## [0.3.6] - Competitive Feature Roadmap
 
 ### Added

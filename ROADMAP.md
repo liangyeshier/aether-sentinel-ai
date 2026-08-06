@@ -92,13 +92,19 @@ Scope:
 
 - Review public BoosterX behavior as a commercial reference.
 - Review Pavise as a public-source Windows game performance reference with a custom non-sale license.
-- Review LaoYing Toolkit as an unverified public-reference feature direction until official source and license are confirmed.
+- Remove LaoYing Toolkit from active planning until official source and license are confirmed.
 - Define the combined AETHER feature upgrade roadmap.
 - Preserve independent implementation and license safety boundaries.
 
 Deliverable:
 
 - `docs/COMPETITIVE_FEATURE_ROADMAP.md`
+- `docs/WINDOWS_FIRST_UPGRADE_ROADMAP.md`
+
+Platform decision:
+
+- Windows is the primary runtime and feature target.
+- macOS remains the current development, UI validation, core validation, and read-only test environment.
 
 ## Phase 03.4 - Network Intelligence Activation
 
