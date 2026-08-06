@@ -15,6 +15,8 @@ In Progress
 - Added platform adapter boundary for future Windows and macOS implementations.
 - Added performance budget policy for low-overhead defaults.
 - Added network quality, ISP region, DNS candidate, and network speed test models.
+- Added verified 360 Secure DNS provider registry metadata.
+- Added DNS provider registry documentation.
 - Added Network Speed Test to the left navigation.
 - Added Simplified Chinese and English UI copy for Network Speed Test.
 - Added Network Intelligence planning document.
@@ -34,6 +36,7 @@ In Progress
 - `src/AetherSentinel.Core/Network/INetworkSpeedTestProvider.cs`
 - `src/AetherSentinel.Core/Network/DnsOptimizationModels.cs`
 - `src/AetherSentinel.Core/Network/NetworkProviderCatalog.cs`
+- `docs/DNS_PROVIDER_REGISTRY.md`
 - `docs/NETWORK_INTELLIGENCE.md`
 - `docs/ARCHITECTURE.md`
 - `docs/UI_DESIGN_SYSTEM.md`
@@ -50,6 +53,7 @@ In Progress
 - Network Speed Test is part of Network Intelligence and must be read-only until user-approved traffic tests are implemented.
 - China mainland ISP and region detection should prefer replaceable offline data providers before any public API.
 - Full-bandwidth speed tests must require explicit user consent because they consume traffic.
+- 360 Secure DNS can be listed as a verified provider record, but recommendation and application still require local benchmark evidence and rollback support.
 
 ## Open Source Candidates
 
@@ -69,6 +73,7 @@ Required verification:
 - Current DNS detection is not implemented yet.
 - ISP and region detection is not implemented yet.
 - Network speed testing is not implemented yet.
+- 360 DNS is registered, but DNS switching is not implemented yet.
 - UI still displays read-only planning cards for the new Network Speed Test module.
 
 ## Risk

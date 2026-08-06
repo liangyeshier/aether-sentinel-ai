@@ -66,6 +66,7 @@ Current prototype scope:
 - Simulated AI optimization queue.
 - Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, DNS optimization, network speed testing, AI advisor, history, and settings.
 - Core models for read-only system snapshots, network quality, DNS candidates, and speed test results.
+- Verified 360 Secure DNS provider registry entry.
 
 No real system scanning or optimization is executed in this prototype.
 
@@ -80,6 +81,7 @@ Core documents:
 - `docs/UI_DESIGN_SYSTEM.md`
 - `docs/GITHUB_WORKFLOW.md`
 - `docs/MILESTONES.md`
+- `docs/DNS_PROVIDER_REGISTRY.md`
 - `docs/NETWORK_INTELLIGENCE.md`
 - `docs/PHASE-00-REPORT.md`
 - `docs/PHASE-01-REPORT.md`

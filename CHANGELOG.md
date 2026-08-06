@@ -4,6 +4,20 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.1] - 360 DNS Provider Registry
+
+### Added
+
+- Verified 360 Secure DNS provider record.
+- DNS provider registry documentation.
+- DNS resolver protocol metadata for Plain DNS, DNS over HTTPS, and DNS over TLS.
+- Official documentation URL, verification date, and recommended ISP tags for DNS provider records.
+
+### Changed
+
+- DNS Optimization page now describes 360 Secure DNS as a verified provider registry entry.
+- Unverified DNS providers no longer use placeholder endpoint addresses.
+
 ## [0.3.0] - Phase 03 Read-only System Intelligence Foundation
 
 ### Added

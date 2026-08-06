@@ -116,6 +116,22 @@ Each provider record should include:
 
 Providers must not be recommended solely because they are popular. The final recommendation must come from measured latency, stability, failure rate, and user region.
 
+## 360 Secure DNS
+
+360 Secure DNS is now recorded as a verified DNS provider candidate in `docs/DNS_PROVIDER_REGISTRY.md`.
+
+Implementation status:
+
+- Official provider record: implemented.
+- DNS optimization UI copy: implemented.
+- Local latency benchmark: not implemented.
+- System DNS apply action: not implemented.
+- Backup and rollback: not implemented.
+
+Rule:
+
+360 Secure DNS can be recommended only after local benchmark results confirm it is appropriate for the user's ISP, region, and stability profile.
+
 ## Security And Privacy
 
 - Do not upload hardware details for network tests.

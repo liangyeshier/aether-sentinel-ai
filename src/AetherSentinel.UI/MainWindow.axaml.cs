@@ -272,7 +272,7 @@ public partial class MainWindow : Window
                 {
                     ("当前 DNS 检测", "读取当前 DNS 配置、网络接口和解析延迟，默认只读。", "只读", "blue"),
                     ("延迟与稳定性测试", "对候选 DNS 做多轮解析耗时、失败率和抖动评估。", "测速", "green"),
-                    ("安全 DNS 候选", "360 安全 DNS 可列入候选，但必须确认官方公开地址与使用条款。", "候选", "amber"),
+                    ("360 安全 DNS", "已加入官方验证 Provider Registry，后续会按运营商、地区和稳定性评分推荐。", "已验证", "green"),
                     ("备份与回滚", "真实切换 DNS 前必须备份原配置，并支持一键恢复。", "必需", "green")
                 },
                 "speed" => new[]
@@ -341,7 +341,7 @@ public partial class MainWindow : Window
             {
                 ("Current DNS Check", "Reads current DNS configuration, network interfaces, and resolver latency in read-only mode.", "Read-only", "blue"),
                 ("Latency And Stability", "Benchmarks candidate DNS providers across lookup time, failure rate, and jitter.", "Benchmark", "green"),
-                ("Secure DNS Candidate", "360 Secure DNS can be considered after official public endpoints and usage terms are confirmed.", "Candidate", "amber"),
+                ("360 Secure DNS", "Added to the verified provider registry; future recommendations depend on ISP, region, and stability score.", "Verified", "green"),
                 ("Backup And Rollback", "Real DNS switching must back up the original configuration and support one-click restore.", "Required", "green")
             },
             "speed" => new[]
