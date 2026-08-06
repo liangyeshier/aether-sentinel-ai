@@ -4,6 +4,22 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.4.0] - Phase 04 Low-overhead Performance Monitor
+
+### Added
+
+- Monitor request and snapshot models.
+- Low-overhead monitor interface.
+- Local single-sample monitor provider.
+- AETHER self CPU and memory overhead measurement.
+- Process count and top memory pressure sampling.
+- Performance Monitor page action button and live result cards.
+- Phase 04 completion report.
+
+### Changed
+
+- Performance Monitor now performs user-triggered sampling instead of remaining a static reservation page.
+
 ## [0.3.10] - Phase 03.6 Game Library And Session Detection
 
 ### Added

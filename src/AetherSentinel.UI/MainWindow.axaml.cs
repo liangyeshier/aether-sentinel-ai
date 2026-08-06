@@ -6,10 +6,12 @@ using System.Text.Json;
 using System.Threading;
 using AetherSentinel.Core.Analysis;
 using AetherSentinel.Core.Gaming;
+using AetherSentinel.Core.Monitoring;
 using AetherSentinel.Core.Network;
 using AetherSentinel.Core.Performance;
 using AetherSentinel.Core.Scanning;
 using AetherSentinel.Platforms.Network;
+using AetherSentinel.Platforms.Monitoring;
 using AetherSentinel.Platforms.Scanning;
 using Avalonia;
 using Avalonia.Controls;
@@ -27,13 +29,16 @@ public partial class MainWindow : Window
     private readonly IPerformanceAnalyzer _performanceAnalyzer = new PerformanceAnalyzer();
     private readonly INetworkDiagnosticsProvider _networkDiagnosticsProvider = new LocalNetworkDiagnosticsProvider();
     private readonly IGameSessionAnalyzer _gameSessionAnalyzer = new GameSessionAnalyzer();
+    private readonly ILowOverheadMonitor _lowOverheadMonitor = new LocalLowOverheadMonitor();
     private readonly List<GameLibraryEntry> _gameLibrary = LoadGameLibrary().ToList();
     private SystemSnapshot? _lastSnapshot;
     private PerformanceAnalysisReport? _lastReport;
     private NetworkDiagnosticsReport? _lastNetworkDiagnostics;
     private GameSessionAnalysis? _lastGameSessionAnalysis;
+    private MonitorSnapshot? _lastMonitorSnapshot;
     private TextBlock? _networkSpeedStatusText;
     private TextBlock? _gameSessionStatusText;
+    private TextBlock? _monitorStatusText;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -198,6 +203,52 @@ public partial class MainWindow : Window
             : _lastGameSessionAnalysis.Explanation;
 
         NavigateTo("game");
+    }
+
+    private async void OnMonitorSampleClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button sampleButton)
+        {
+            sampleButton.IsEnabled = false;
+            sampleButton.Content = IsZh ? "采样中" : "Sampling";
+        }
+
+        if (_monitorStatusText is not null)
+        {
+            _monitorStatusText.Text = IsZh
+                ? "正在执行一次轻量采样，不启动常驻后台监控。"
+                : "Capturing one light sample without persistent background monitoring.";
+        }
+
+        try
+        {
+            _lastMonitorSnapshot = await _lowOverheadMonitor.CaptureOnceAsync(
+                new MonitorRequest(
+                    Mode: MonitorSamplingMode.Light,
+                    SampleWindow: TimeSpan.FromMilliseconds(350),
+                    TopProcessCount: 5,
+                    Budget: PerformanceBudgetPolicy.DefaultLowOverhead),
+                CancellationToken.None);
+
+            CurrentStateBodyTitleText.Text = IsZh ? "性能采样完成" : "Performance sample complete";
+            CurrentStateBodyText.Text = FormatMonitorSummary(_lastMonitorSnapshot);
+            NavigateTo("monitor");
+        }
+        catch (Exception exception)
+        {
+            if (_monitorStatusText is not null)
+            {
+                _monitorStatusText.Text = exception.Message;
+            }
+        }
+        finally
+        {
+            if (sender is Button finalButton)
+            {
+                finalButton.IsEnabled = true;
+                finalButton.Content = IsZh ? "采样一次" : "Sample Once";
+            }
+        }
     }
 
     private void SetLanguage(string language)
@@ -521,7 +572,7 @@ public partial class MainWindow : Window
             grid.Children.Add(card);
         }
 
-        if (page is "speed" or "game")
+        if (page is "speed" or "game" or "monitor")
         {
             return new ScrollViewer
             {
@@ -531,7 +582,12 @@ public partial class MainWindow : Window
                     Spacing = 14,
                     Children =
                     {
-                        page == "speed" ? CreateNetworkSpeedActionPanel() : CreateGameSessionActionPanel(),
+                        page switch
+                        {
+                            "speed" => CreateNetworkSpeedActionPanel(),
+                            "game" => CreateGameSessionActionPanel(),
+                            _ => CreateMonitorActionPanel()
+                        },
                         grid
                     }
                 }
@@ -555,6 +611,11 @@ public partial class MainWindow : Window
         if (page == "game" && _lastGameSessionAnalysis is not null)
         {
             return GetGameSessionRows(_lastGameSessionAnalysis);
+        }
+
+        if (page == "monitor" && _lastMonitorSnapshot is not null)
+        {
+            return GetMonitorRows(_lastMonitorSnapshot);
         }
 
         if (page == "dns" && _lastNetworkDiagnostics is not null)
@@ -1039,6 +1100,61 @@ public partial class MainWindow : Window
         };
     }
 
+    private Control CreateMonitorActionPanel()
+    {
+        _monitorStatusText = new TextBlock
+        {
+            Text = _lastMonitorSnapshot is null
+                ? (IsZh
+                    ? "点击采样一次：只做短窗口轻量采样，不启动常驻后台监控。"
+                    : "Sample once: short-window light sampling only, without persistent background monitoring.")
+                : FormatMonitorSummary(_lastMonitorSnapshot),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var button = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "采样一次" : "Sample Once",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        button.Click += OnMonitorSampleClicked;
+        Grid.SetColumn(button, 1);
+
+        return new Border
+        {
+            Classes = { "card" },
+            Padding = new Thickness(18),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                ColumnSpacing = 16,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Spacing = 7,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = IsZh ? "低占用监控控制" : "Low-overhead Monitor Control",
+                                FontSize = 18,
+                                FontWeight = FontWeight.SemiBold
+                            },
+                            _monitorStatusText
+                        }
+                    },
+                    button
+                }
+            }
+        };
+    }
+
     private (string Title, string Body, string Badge, string Accent)[] GetNetworkDiagnosticRows(NetworkDiagnosticsReport report)
     {
         var bestLatency = report.LatencyResults
@@ -1119,6 +1235,31 @@ public partial class MainWindow : Window
         };
     }
 
+    private (string Title, string Body, string Badge, string Accent)[] GetMonitorRows(MonitorSnapshot snapshot)
+    {
+        var top = snapshot.TopMemoryProcesses.FirstOrDefault();
+        var warning = snapshot.Warnings.FirstOrDefault();
+
+        if (IsZh)
+        {
+            return new[]
+            {
+                ("AETHER 自身占用", $"CPU 估算 {snapshot.AppCpuPercent:0.00}% · 内存 {snapshot.AppMemoryMb} MB。", "自身", snapshot.AppCpuPercent <= 1 && snapshot.AppMemoryMb <= 150 ? "green" : "amber"),
+                ("采样策略", snapshot.Method, "单次", "green"),
+                ("进程压力", top is null ? "未读取到进程列表。" : $"{top.Name} · PID {top.ProcessId} · {FormatMb(top.MemoryMb)}。", "Top", top?.ImpactLevel == ProcessImpactLevel.High ? "amber" : "blue"),
+                ("监控提示", warning is null ? "暂无监控提示。" : warning.Detail, warning is null ? "信息" : TranslateMonitorSeverity(warning.Severity), warning is null ? "blue" : GetMonitorWarningAccent(warning.Severity))
+            };
+        }
+
+        return new[]
+        {
+            ("AETHER Overhead", $"CPU estimate {snapshot.AppCpuPercent:0.00}% · memory {snapshot.AppMemoryMb} MB.", "Self", snapshot.AppCpuPercent <= 1 && snapshot.AppMemoryMb <= 150 ? "green" : "amber"),
+            ("Sampling Policy", snapshot.Method, "Once", "green"),
+            ("Process Pressure", top is null ? "No process list captured." : $"{top.Name} · PID {top.ProcessId} · {FormatMb(top.MemoryMb)}.", "Top", top?.ImpactLevel == ProcessImpactLevel.High ? "amber" : "blue"),
+            ("Monitor Note", warning?.Detail ?? "No monitor warning.", warning?.Severity.ToString() ?? "Info", warning is null ? "blue" : GetMonitorWarningAccent(warning.Severity))
+        };
+    }
+
     private string FormatNetworkDiagnosticsSummary(NetworkDiagnosticsReport report)
     {
         if (!IsZh)
@@ -1183,6 +1324,21 @@ public partial class MainWindow : Window
         };
     }
 
+    private string TranslateMonitorSeverity(MonitorWarningSeverity severity)
+    {
+        if (!IsZh)
+        {
+            return severity.ToString();
+        }
+
+        return severity switch
+        {
+            MonitorWarningSeverity.Risk => "风险",
+            MonitorWarningSeverity.Watch => "关注",
+            _ => "信息"
+        };
+    }
+
     private static string GetNetworkAccent(NetworkQualityLevel qualityLevel)
     {
         return qualityLevel switch
@@ -1215,6 +1371,26 @@ public partial class MainWindow : Window
             GameSessionState.NeedsConfirmation => "amber",
             _ => "blue"
         };
+    }
+
+    private static string GetMonitorWarningAccent(MonitorWarningSeverity severity)
+    {
+        return severity switch
+        {
+            MonitorWarningSeverity.Risk => "red",
+            MonitorWarningSeverity.Watch => "amber",
+            _ => "green"
+        };
+    }
+
+    private string FormatMonitorSummary(MonitorSnapshot snapshot)
+    {
+        if (!IsZh)
+        {
+            return $"AETHER CPU {snapshot.AppCpuPercent:0.00}%, memory {snapshot.AppMemoryMb} MB, processes {snapshot.ProcessCount}.";
+        }
+
+        return $"AETHER CPU {snapshot.AppCpuPercent:0.00}%，内存 {snapshot.AppMemoryMb} MB，进程数 {snapshot.ProcessCount}。";
     }
 
     private static IReadOnlyList<GameLibraryEntry> LoadGameLibrary()

@@ -29,7 +29,7 @@ Understand -> Analyze -> Explain -> Recommend -> Optimize -> Verify
 Current phase:
 
 ```text
-Phase 03 - Read-only System Intelligence Foundation
+Phase 04 - Low-overhead Performance Monitor
 ```
 
 The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, core read-only intelligence contracts, first local read-only scanning, and a Windows-first upgrade roadmap aligned against BoosterX and Pavise. Optimization execution is still disabled.
@@ -74,6 +74,7 @@ Current prototype scope:
 - User-triggered quick Network Speed Test with Ping/Jitter and DNS benchmark results.
 - Expanded Windows-first read-only snapshot fields for startup items, active power plan, GPU name, and game process candidates.
 - Local game library and read-only game session detection controls.
+- User-triggered low-overhead performance monitor sample.
 
 No optimization is executed in this prototype.
 
@@ -103,6 +104,7 @@ Core documents:
 - `docs/PHASE-03-4-NETWORK-INTELLIGENCE-REPORT.md`
 - `docs/PHASE-03-5-WINDOWS-READONLY-ADAPTER-REPORT.md`
 - `docs/PHASE-03-6-GAME-SESSION-REPORT.md`
+- `docs/PHASE-04-LOW-OVERHEAD-MONITOR-REPORT.md`
 
 ## Repository Governance
 

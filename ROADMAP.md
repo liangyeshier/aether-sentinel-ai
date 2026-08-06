@@ -181,7 +181,7 @@ Remaining:
 
 ## Phase 04 - Low-overhead Performance Monitoring
 
-Status: Planned
+Status: Completed
 
 Scope:
 
@@ -190,6 +190,22 @@ Scope:
 - Reduce or pause sampling while the app is hidden, idle, or during game sessions.
 - Expose performance cost inside Settings so users can understand overhead.
 - Explain top CPU, memory, disk, network, and background pressure sources.
+
+Current deliverables:
+
+- User-triggered single light sample.
+- AETHER self CPU estimate.
+- AETHER self memory measurement.
+- Process count.
+- Top memory pressure processes.
+- Monitor warnings.
+
+Remaining:
+
+- System-wide CPU sampling.
+- GPU load and temperature.
+- Disk queue and network throughput.
+- Continuous sampling controls.
 
 ## Phase 05 - Optimization Rule Engine Dry Run
 
