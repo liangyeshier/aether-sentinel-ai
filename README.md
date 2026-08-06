@@ -29,10 +29,10 @@ Understand -> Analyze -> Explain -> Recommend -> Optimize -> Verify
 Current phase:
 
 ```text
-Phase 00 - Product Foundation
+Phase 02.1 - DNS Optimization Reservation
 ```
 
-Phase 00 establishes the product foundation only. It does not include production feature implementation.
+The current prototype includes the product foundation, runnable desktop shell, clickable module previews, and a reserved DNS Optimization module. Real system scanning and optimization execution are still disabled.
 
 ## Technical Direction
 
@@ -44,7 +44,7 @@ Phase 00 establishes the product foundation only. It does not include production
 
 ## Run The Prototype
 
-Phase 02 includes a runnable Avalonia desktop shell with clickable module pages and simulated, read-only capability previews.
+Phase 02.1 includes a runnable Avalonia desktop shell with clickable module pages and simulated, read-only capability previews.
 
 Requirements:
 
@@ -64,7 +64,7 @@ Current prototype scope:
 - Clickable navigation modules.
 - Simulated performance metrics.
 - Simulated AI optimization queue.
-- Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, AI advisor, history, and settings.
+- Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, DNS optimization, AI advisor, history, and settings.
 
 No real system scanning or optimization is executed in this prototype.
 
@@ -82,6 +82,7 @@ Core documents:
 - `docs/PHASE-00-REPORT.md`
 - `docs/PHASE-01-REPORT.md`
 - `docs/PHASE-02-REPORT.md`
+- `docs/PHASE-02-1-REPORT.md`
 
 ## Repository Governance
 

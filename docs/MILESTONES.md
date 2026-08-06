@@ -33,6 +33,100 @@ Acceptance criteria:
 - Future update system has reserved architecture and workflow locations.
 - No production business code is created.
 
+## Milestone 1: Desktop Shell Preview
+
+Status: Completed
+
+Goal:
+
+Create a runnable Avalonia desktop shell.
+
+Deliverables:
+
+- Dashboard prototype.
+- BoosterX-inspired dark visual direction.
+- Simulated performance metrics.
+- Simplified Chinese and English language switch.
+- Phase 01 completion report.
+
+## Milestone 2: Module Activation
+
+Status: Completed
+
+Goal:
+
+Activate the main product navigation with read-only module previews.
+
+Deliverables:
+
+- Clickable navigation modules.
+- Module pages for PC Intelligence, Game Optimization, Performance Monitor, Optimization Center, AI Advisor, History, and Settings.
+- Read-only capability cards.
+- Phase 02 completion report.
+
+## Milestone 2.1: DNS Optimization Reservation
+
+Status: Completed
+
+Goal:
+
+Reserve DNS Optimization as a dedicated capability without changing system DNS settings.
+
+Deliverables:
+
+- DNS Optimization navigation entry.
+- Read-only DNS detection and benchmarking planning cards.
+- Secure DNS provider candidate planning.
+- Backup and rollback requirements.
+- Phase 02.1 completion report.
+
+## Milestone 3: Read-only System Intelligence
+
+Status: Planned
+
+Goal:
+
+Build the scanner contracts and platform adapter boundaries for safe system intelligence.
+
+Deliverables:
+
+- Core scanner abstractions.
+- Windows read-only adapter plan.
+- macOS read-only adapter plan.
+- Structured system snapshot model.
+- No optimization execution.
+
+## Milestone 4: Low-overhead Performance Monitoring
+
+Status: Planned
+
+Goal:
+
+Add on-demand realtime monitoring with strict CPU and memory budgets.
+
+Deliverables:
+
+- Adaptive sampling policy.
+- Lightweight metric model.
+- Monitor page integration.
+- Performance overhead reporting.
+
+## Milestone 5: Optimization Rule Engine Dry Run
+
+Status: Planned
+
+Goal:
+
+Define safe optimization rules and dry-run previews before real changes.
+
+Deliverables:
+
+- Rule schema.
+- Risk level model.
+- Backup and rollback requirements.
+- Dry-run report model.
+- Verification signal model.
+
 ## Milestone System
 
 The milestone system must support future:

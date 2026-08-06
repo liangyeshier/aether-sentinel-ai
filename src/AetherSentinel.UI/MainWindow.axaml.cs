@@ -49,6 +49,7 @@ public partial class MainWindow : Window
         NavGameOptimizationButton.Content = zh ? "游戏优化" : "Game Optimization";
         NavPerformanceMonitorButton.Content = zh ? "性能监控" : "Performance Monitor";
         NavOptimizationCenterButton.Content = zh ? "优化中心" : "Optimization Center";
+        NavDnsOptimizationButton.Content = zh ? "DNS 优化" : "DNS Optimization";
         NavAiAdvisorButton.Content = zh ? "AI 顾问" : "AI Advisor";
         NavHistoryButton.Content = zh ? "历史记录" : "History";
         NavSettingsButton.Content = zh ? "设置" : "Settings";
@@ -157,6 +158,7 @@ public partial class MainWindow : Window
             (NavGameOptimizationButton, "game"),
             (NavPerformanceMonitorButton, "monitor"),
             (NavOptimizationCenterButton, "optimization"),
+            (NavDnsOptimizationButton, "dns"),
             (NavAiAdvisorButton, "advisor"),
             (NavHistoryButton, "history"),
             (NavSettingsButton, "settings")
@@ -178,6 +180,7 @@ public partial class MainWindow : Window
             "game" => IsZh ? "游戏优化" : "Game Optimization",
             "monitor" => IsZh ? "性能监控" : "Performance Monitor",
             "optimization" => IsZh ? "优化中心" : "Optimization Center",
+            "dns" => IsZh ? "DNS 优化" : "DNS Optimization",
             "advisor" => IsZh ? "AI 顾问" : "AI Advisor",
             "history" => IsZh ? "历史记录" : "History",
             "settings" => IsZh ? "设置" : "Settings",
@@ -193,6 +196,7 @@ public partial class MainWindow : Window
             "game" => IsZh ? "游戏前检查、游戏中保护与配置档预留" : "Pre-game checks, in-game protection, and profile reservations",
             "monitor" => IsZh ? "按需启动的轻量实时指标与趋势视图" : "On-demand lightweight realtime metrics and trend views",
             "optimization" => IsZh ? "安全优化规则、风险等级、备份与回滚框架" : "Safe optimization rules, risk levels, backup, and rollback framework",
+            "dns" => IsZh ? "检测 DNS 延迟、稳定性与安全风险，默认只读不改网络配置" : "Checks DNS latency, stability, and safety risk without changing network settings by default",
             "advisor" => IsZh ? "基于扫描报告的解释、建议与风险说明" : "Explanations, recommendations, and risk notes based on scan reports",
             "history" => IsZh ? "扫描、建议、优化和回滚记录" : "Scan, recommendation, optimization, and rollback history",
             "settings" => IsZh ? "语言、性能模式、隐私与更新设置" : "Language, performance mode, privacy, and update settings",
@@ -260,6 +264,13 @@ public partial class MainWindow : Window
                     ("低风险优化", "启动项建议、临时文件清理、电源计划提示优先进入第一批。", "优先", "amber"),
                     ("验证机制", "优化后必须记录前后状态，并生成可回看报告。", "验证", "green")
                 },
+                "dns" => new[]
+                {
+                    ("当前 DNS 检测", "读取当前 DNS 配置、网络接口和解析延迟，默认只读。", "只读", "blue"),
+                    ("延迟与稳定性测试", "对候选 DNS 做多轮解析耗时、失败率和抖动评估。", "测速", "green"),
+                    ("安全 DNS 候选", "360 安全 DNS 可列入候选，但必须确认官方公开地址与使用条款。", "候选", "amber"),
+                    ("备份与回滚", "真实切换 DNS 前必须备份原配置，并支持一键恢复。", "必需", "green")
+                },
                 "advisor" => new[]
                 {
                     ("系统报告摘要", "AI 只读取扫描报告和本地结构化结果，不直接控制系统。", "解释", "blue"),
@@ -314,6 +325,13 @@ public partial class MainWindow : Window
                 ("Dry Run", "Default mode only shows what would change before real execution exists.", "Default", "green"),
                 ("Low-risk Actions", "Startup suggestions, temp cleanup, and power-plan hints come first.", "Priority", "amber"),
                 ("Verification", "Future actions must record before/after state and create a report.", "Verify", "green")
+            },
+            "dns" => new[]
+            {
+                ("Current DNS Check", "Reads current DNS configuration, network interfaces, and resolver latency in read-only mode.", "Read-only", "blue"),
+                ("Latency And Stability", "Benchmarks candidate DNS providers across lookup time, failure rate, and jitter.", "Benchmark", "green"),
+                ("Secure DNS Candidate", "360 Secure DNS can be considered after official public endpoints and usage terms are confirmed.", "Candidate", "amber"),
+                ("Backup And Rollback", "Real DNS switching must back up the original configuration and support one-click restore.", "Required", "green")
             },
             "advisor" => new[]
             {

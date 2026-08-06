@@ -25,9 +25,10 @@ Main navigation:
 3. Game Optimization
 4. Performance Monitor
 5. Optimization Center
-6. AI Advisor
-7. History
-8. Settings
+6. DNS Optimization
+7. AI Advisor
+8. History
+9. Settings
 
 ## Dashboard Design
 

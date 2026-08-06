@@ -41,6 +41,50 @@ Scope:
 - Low-overhead operating rules are visible in Settings and Monitor views.
 - No real system scanning, background service, or optimization execution is added.
 
+## Phase 02.1 - DNS Optimization Reservation
+
+Status: Completed
+
+Scope:
+
+- Add DNS Optimization as a dedicated left navigation module.
+- Reserve read-only DNS detection, latency benchmarking, secure DNS provider comparison, and rollback requirements.
+- Treat 360 Secure DNS as a candidate provider only after official public endpoints and usage terms are confirmed.
+- Do not change system DNS settings in this phase.
+
+## Phase 03 - Read-only System Intelligence
+
+Status: Planned
+
+Scope:
+
+- Build cross-platform scanner contracts in the core layer.
+- Add Windows and macOS adapter boundaries for read-only system information.
+- Collect CPU, GPU, memory, storage, OS, process, startup, network, and DNS state without making system changes.
+- Keep background sampling disabled by default to protect idle CPU and memory usage.
+
+## Phase 04 - Low-overhead Performance Monitoring
+
+Status: Planned
+
+Scope:
+
+- Add on-demand realtime metrics with strict sampling budgets.
+- Prefer native APIs and lightweight timers over always-on polling.
+- Reduce or pause sampling while the app is hidden, idle, or during game sessions.
+- Expose performance cost inside Settings so users can understand overhead.
+
+## Phase 05 - Optimization Rule Engine Dry Run
+
+Status: Planned
+
+Scope:
+
+- Define safe optimization rule schema.
+- Support dry-run previews before any real change.
+- Require risk level, backup method, verification signal, and rollback method for every rule.
+- Keep all execution disabled until rules pass validation.
+
 ## Future Product Expansion
 
 The architecture reserves space for future AETHER product lines:

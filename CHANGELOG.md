@@ -4,6 +4,18 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.2.1] - Phase 02.1 DNS Optimization Reservation
+
+### Added
+
+- DNS Optimization left navigation module.
+- Simplified Chinese and English DNS Optimization page copy.
+- Read-only DNS capability cards for current DNS detection, latency benchmarking, secure DNS candidates, and backup/rollback requirements.
+
+### Changed
+
+- Roadmap now recognizes DNS Optimization as a dedicated product capability candidate.
+
 ## [0.0.0] - Phase 00 Foundation
 
 ### Added
