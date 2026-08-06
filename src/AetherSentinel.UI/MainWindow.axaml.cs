@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using AetherSentinel.Core.Analysis;
+using AetherSentinel.Core.Gaming;
 using AetherSentinel.Core.Network;
 using AetherSentinel.Core.Performance;
 using AetherSentinel.Core.Scanning;
@@ -13,6 +17,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 
 namespace AetherSentinel.UI;
 
@@ -21,10 +26,14 @@ public partial class MainWindow : Window
     private readonly ISystemScanner _systemScanner = new PlatformSystemScanner(new LocalPlatformSystemAdapter());
     private readonly IPerformanceAnalyzer _performanceAnalyzer = new PerformanceAnalyzer();
     private readonly INetworkDiagnosticsProvider _networkDiagnosticsProvider = new LocalNetworkDiagnosticsProvider();
+    private readonly IGameSessionAnalyzer _gameSessionAnalyzer = new GameSessionAnalyzer();
+    private readonly List<GameLibraryEntry> _gameLibrary = LoadGameLibrary().ToList();
     private SystemSnapshot? _lastSnapshot;
     private PerformanceAnalysisReport? _lastReport;
     private NetworkDiagnosticsReport? _lastNetworkDiagnostics;
+    private GameSessionAnalysis? _lastGameSessionAnalysis;
     private TextBlock? _networkSpeedStatusText;
+    private TextBlock? _gameSessionStatusText;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -130,6 +139,65 @@ public partial class MainWindow : Window
                 finalButton.Content = IsZh ? "开始轻量测速" : "Run Quick Test";
             }
         }
+    }
+
+    private async void OnAddGameClicked(object? sender, RoutedEventArgs e)
+    {
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = IsZh ? "选择游戏 EXE" : "Select Game EXE",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType(IsZh ? "可执行文件" : "Executable")
+                {
+                    Patterns = OperatingSystem.IsWindows() ? ["*.exe"] : ["*"]
+                }
+            ]
+        });
+
+        var file = files.FirstOrDefault();
+        if (file is null)
+        {
+            return;
+        }
+
+        var path = file.Path.LocalPath;
+        var entry = new GameLibraryEntry(
+            Id: Guid.NewGuid().ToString("N"),
+            DisplayName: Path.GetFileNameWithoutExtension(path),
+            ExecutablePath: path,
+            Source: GameLibrarySource.ManualExe,
+            AddedAt: DateTimeOffset.Now,
+            IsEnabled: true);
+
+        _gameLibrary.Add(entry);
+        SaveGameLibrary(_gameLibrary);
+
+        _gameSessionStatusText?.SetValue(
+            TextBlock.TextProperty,
+            IsZh ? $"已添加游戏：{entry.DisplayName}" : $"Added game: {entry.DisplayName}");
+
+        NavigateTo("game");
+    }
+
+    private void OnAnalyzeGameSessionClicked(object? sender, RoutedEventArgs e)
+    {
+        if (_lastSnapshot is null)
+        {
+            _gameSessionStatusText?.SetValue(
+                TextBlock.TextProperty,
+                IsZh ? "请先执行只读扫描，再识别游戏会话。" : "Run a read-only scan before detecting game sessions.");
+            return;
+        }
+
+        _lastGameSessionAnalysis = _gameSessionAnalyzer.Analyze(_lastSnapshot, _gameLibrary);
+        GameSessionBodyTitleText.Text = TranslateGameSessionState(_lastGameSessionAnalysis.State);
+        GameSessionBodyText.Text = IsZh
+            ? TranslateGameSessionExplanation(_lastGameSessionAnalysis)
+            : _lastGameSessionAnalysis.Explanation;
+
+        NavigateTo("game");
     }
 
     private void SetLanguage(string language)
@@ -453,7 +521,7 @@ public partial class MainWindow : Window
             grid.Children.Add(card);
         }
 
-        if (page == "speed")
+        if (page is "speed" or "game")
         {
             return new ScrollViewer
             {
@@ -463,7 +531,7 @@ public partial class MainWindow : Window
                     Spacing = 14,
                     Children =
                     {
-                        CreateNetworkSpeedActionPanel(),
+                        page == "speed" ? CreateNetworkSpeedActionPanel() : CreateGameSessionActionPanel(),
                         grid
                     }
                 }
@@ -482,6 +550,11 @@ public partial class MainWindow : Window
         if (page == "speed" && _lastNetworkDiagnostics is not null)
         {
             return GetNetworkDiagnosticRows(_lastNetworkDiagnostics);
+        }
+
+        if (page == "game" && _lastGameSessionAnalysis is not null)
+        {
+            return GetGameSessionRows(_lastGameSessionAnalysis);
         }
 
         if (page == "dns" && _lastNetworkDiagnostics is not null)
@@ -894,6 +967,78 @@ public partial class MainWindow : Window
         };
     }
 
+    private Control CreateGameSessionActionPanel()
+    {
+        _gameSessionStatusText = new TextBlock
+        {
+            Text = _lastGameSessionAnalysis is null
+                ? (IsZh
+                    ? $"游戏库 {_gameLibrary.Count} 个条目。添加 EXE 后执行扫描，即可做只读会话识别。"
+                    : $"Game library has {_gameLibrary.Count} entries. Add an EXE, run scan, then detect the session read-only.")
+                : (IsZh ? TranslateGameSessionExplanation(_lastGameSessionAnalysis) : _lastGameSessionAnalysis.Explanation),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var addButton = new Button
+        {
+            Classes = { "secondary" },
+            Content = IsZh ? "添加游戏" : "Add Game",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        addButton.Click += OnAddGameClicked;
+
+        var analyzeButton = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "识别会话" : "Detect Session",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        analyzeButton.Click += OnAnalyzeGameSessionClicked;
+
+        var buttonPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Children = { addButton, analyzeButton }
+        };
+        Grid.SetColumn(buttonPanel, 1);
+
+        return new Border
+        {
+            Classes = { "card" },
+            Padding = new Thickness(18),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                ColumnSpacing = 16,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Spacing = 7,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = IsZh ? "游戏会话控制" : "Game Session Control",
+                                FontSize = 18,
+                                FontWeight = FontWeight.SemiBold
+                            },
+                            _gameSessionStatusText
+                        }
+                    },
+                    buttonPanel
+                }
+            }
+        };
+    }
+
     private (string Title, string Body, string Badge, string Accent)[] GetNetworkDiagnosticRows(NetworkDiagnosticsReport report)
     {
         var bestLatency = report.LatencyResults
@@ -952,6 +1097,28 @@ public partial class MainWindow : Window
             .ToArray();
     }
 
+    private (string Title, string Body, string Badge, string Accent)[] GetGameSessionRows(GameSessionAnalysis analysis)
+    {
+        if (IsZh)
+        {
+            return new[]
+            {
+                ("会话状态", TranslateGameSessionExplanation(analysis), TranslateGameSessionState(analysis.State), GetGameSessionAccent(analysis.State)),
+                ("游戏库", _gameLibrary.Count == 0 ? "游戏库为空。可通过添加游戏按钮加入 EXE。" : $"已启用 {_gameLibrary.Count(entry => entry.IsEnabled)} / {_gameLibrary.Count} 个条目。", "本地", "blue"),
+                ("主候选进程", analysis.PrimaryCandidate is null ? "未识别到主候选进程。" : $"{analysis.PrimaryCandidate.Name} · PID {analysis.PrimaryCandidate.ProcessId} · {TranslateGameRole(analysis.PrimaryCandidate.Role)} · 置信度 {analysis.PrimaryCandidate.Confidence:P0}", "只读", analysis.PrimaryCandidate is null ? "amber" : "green"),
+                ("安全边界", "不注入、不改内存、不改游戏文件、不规避反作弊；当前仅做识别。", "保护", "green")
+            };
+        }
+
+        return new[]
+        {
+            ("Session State", analysis.Explanation, analysis.State.ToString(), GetGameSessionAccent(analysis.State)),
+            ("Game Library", _gameLibrary.Count == 0 ? "Game library is empty. Add an EXE with the Add Game button." : $"{_gameLibrary.Count(entry => entry.IsEnabled)} / {_gameLibrary.Count} entries enabled.", "Local", "blue"),
+            ("Primary Candidate", analysis.PrimaryCandidate is null ? "No primary candidate detected." : $"{analysis.PrimaryCandidate.Name} · PID {analysis.PrimaryCandidate.ProcessId} · {analysis.PrimaryCandidate.Role} · confidence {analysis.PrimaryCandidate.Confidence:P0}", "Read-only", analysis.PrimaryCandidate is null ? "amber" : "green"),
+            ("Safety Boundary", "No injection, no memory modification, no game file modification, and no anti-cheat bypass. Detection only.", "Protect", "green")
+        };
+    }
+
     private string FormatNetworkDiagnosticsSummary(NetworkDiagnosticsReport report)
     {
         if (!IsZh)
@@ -987,6 +1154,35 @@ public partial class MainWindow : Window
         };
     }
 
+    private string TranslateGameSessionState(GameSessionState state)
+    {
+        if (!IsZh)
+        {
+            return state.ToString();
+        }
+
+        return state switch
+        {
+            GameSessionState.LibraryMatch => "游戏库匹配",
+            GameSessionState.GameCandidate => "游戏候选",
+            GameSessionState.LauncherCandidate => "启动器候选",
+            GameSessionState.NeedsConfirmation => "需要确认",
+            _ => "未检测到"
+        };
+    }
+
+    private string TranslateGameSessionExplanation(GameSessionAnalysis analysis)
+    {
+        return analysis.State switch
+        {
+            GameSessionState.LibraryMatch => $"已将运行进程 {analysis.PrimaryCandidate?.Name} 与游戏库条目 {analysis.LibraryMatch?.DisplayName} 匹配。当前仍为只读识别。",
+            GameSessionState.GameCandidate => $"检测到可能的游戏进程 {analysis.PrimaryCandidate?.Name}。后续优化前必须用户确认。",
+            GameSessionState.LauncherCandidate => $"检测到启动器候选 {analysis.PrimaryCandidate?.Name}。AETHER 不会自动把启动器当作游戏本体。",
+            GameSessionState.NeedsConfirmation => "游戏库存在条目，但当前未发现匹配的运行进程。",
+            _ => "未检测到运行中的游戏候选。"
+        };
+    }
+
     private static string GetNetworkAccent(NetworkQualityLevel qualityLevel)
     {
         return qualityLevel switch
@@ -1007,6 +1203,51 @@ public partial class MainWindow : Window
             DnsRecommendationLevel.Candidate => "blue",
             _ => "amber"
         };
+    }
+
+    private static string GetGameSessionAccent(GameSessionState state)
+    {
+        return state switch
+        {
+            GameSessionState.LibraryMatch => "green",
+            GameSessionState.GameCandidate => "blue",
+            GameSessionState.LauncherCandidate => "amber",
+            GameSessionState.NeedsConfirmation => "amber",
+            _ => "blue"
+        };
+    }
+
+    private static IReadOnlyList<GameLibraryEntry> LoadGameLibrary()
+    {
+        try
+        {
+            var path = GetGameLibraryPath();
+            if (!File.Exists(path))
+            {
+                return [];
+            }
+
+            var json = File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<GameLibraryEntry>>(json) ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static void SaveGameLibrary(IReadOnlyList<GameLibraryEntry> entries)
+    {
+        var path = GetGameLibraryPath();
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var json = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(path, json);
+    }
+
+    private static string GetGameLibraryPath()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return Path.Combine(appData, "AETHER AGENTIC Studio", "AETHER SENTINEL AI", "game-library.json");
     }
 
     private Border CreateModuleCard(string title, string body, string badge, string accent)

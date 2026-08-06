@@ -156,7 +156,7 @@ Remaining:
 
 ## Phase 03.6 - Game Session Intelligence
 
-Status: Planned
+Status: Completed
 
 Scope:
 
@@ -164,6 +164,20 @@ Scope:
 - Detect game sessions, foreground state, launchers, updaters, crash reporters, and anti-cheat roles.
 - Produce read-only session intelligence before any optimization execution.
 - Keep no-injection, no-memory-modification, and no-game-file-modification boundaries.
+
+Current deliverables:
+
+- Local game library model and persistence.
+- Add Game button.
+- Detect Session button.
+- Read-only game session analyzer.
+- Game, launcher, anti-cheat, and capture-tool candidate boundaries.
+
+Remaining:
+
+- Foreground window and fullscreen detection.
+- Launcher-to-game-body learning.
+- Store/library auto-scan.
 
 ## Phase 04 - Low-overhead Performance Monitoring
 

@@ -4,6 +4,22 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.10] - Phase 03.6 Game Library And Session Detection
+
+### Added
+
+- Game library entry model.
+- Game session analysis model.
+- Game-session safety boundary model.
+- Read-only game session analyzer.
+- Local game library persistence.
+- Game Optimization page controls for adding games and detecting sessions.
+- Phase 03.6 completion report.
+
+### Changed
+
+- Game Optimization now distinguishes library matches, game candidates, launcher candidates, and needs-confirmation states.
+
 ## [0.3.9] - Phase 03.5 Windows Read-only Adapter Expansion
 
 ### Added
