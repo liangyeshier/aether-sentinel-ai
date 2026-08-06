@@ -4,6 +4,22 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.9.0] - Phase 09 GPU And Driver Intelligence
+
+### Added
+
+- GPU intelligence report model.
+- GPU vendor detection.
+- GPU telemetry availability model.
+- GPU insight model.
+- GPU intelligence analyzer.
+- PC Intelligence GPU intelligence live row.
+- Phase 09 completion report.
+
+### Changed
+
+- GPU driver write actions are explicitly disabled by policy until Windows hardware validation exists.
+
 ## [0.8.0] - Phase 08 Windows Toolkit Center
 
 ### Added

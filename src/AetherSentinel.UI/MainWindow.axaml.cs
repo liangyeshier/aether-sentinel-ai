@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using AetherSentinel.Core.Analysis;
 using AetherSentinel.Core.Gaming;
+using AetherSentinel.Core.Gpu;
 using AetherSentinel.Core.Monitoring;
 using AetherSentinel.Core.Network;
 using AetherSentinel.Core.Optimization;
@@ -29,6 +30,7 @@ public partial class MainWindow : Window
 {
     private readonly ISystemScanner _systemScanner = new PlatformSystemScanner(new LocalPlatformSystemAdapter());
     private readonly IPerformanceAnalyzer _performanceAnalyzer = new PerformanceAnalyzer();
+    private readonly IGpuIntelligenceAnalyzer _gpuIntelligenceAnalyzer = new GpuIntelligenceAnalyzer();
     private readonly INetworkDiagnosticsProvider _networkDiagnosticsProvider = new LocalNetworkDiagnosticsProvider();
     private readonly IGameSessionAnalyzer _gameSessionAnalyzer = new GameSessionAnalyzer();
     private readonly IGameBoostPlanner _gameBoostPlanner = new GameBoostPlanner();
@@ -44,6 +46,7 @@ public partial class MainWindow : Window
     private MonitorSnapshot? _lastMonitorSnapshot;
     private OptimizationDryRunReport? _lastDryRunReport;
     private OptimizationExecutionReport? _lastExecutionReport;
+    private GpuIntelligenceReport? _lastGpuReport;
     private TextBlock? _networkSpeedStatusText;
     private TextBlock? _gameSessionStatusText;
     private TextBlock? _monitorStatusText;
@@ -95,6 +98,7 @@ public partial class MainWindow : Window
                 CancellationToken.None);
 
             _lastReport = _performanceAnalyzer.Analyze(_lastSnapshot);
+            _lastGpuReport = _gpuIntelligenceAnalyzer.Analyze(_lastSnapshot);
             ApplySnapshot(_lastSnapshot);
             NavigateTo(_currentPage);
         }
@@ -395,6 +399,7 @@ public partial class MainWindow : Window
         if (_lastSnapshot is not null)
         {
             _lastReport ??= _performanceAnalyzer.Analyze(_lastSnapshot);
+            _lastGpuReport ??= _gpuIntelligenceAnalyzer.Analyze(_lastSnapshot);
             ApplySnapshot(_lastSnapshot);
         }
 
@@ -873,7 +878,7 @@ public partial class MainWindow : Window
                 {
                     ("系统信息", $"{snapshot.OperatingSystem.Name} / {snapshot.OperatingSystem.Architecture} / {snapshot.OperatingSystem.DeviceName}", "真实", "green"),
                     ("CPU", snapshot.Hardware.CpuName, "只读", "blue"),
-                    ("GPU", snapshot.Hardware.GpuName, "只读", "blue"),
+                    ("GPU 智能", _lastGpuReport is null ? snapshot.Hardware.GpuName : $"{_lastGpuReport.Name} · {TranslateGpuVendor(_lastGpuReport.Vendor)} · 遥测：{TranslateGpuTelemetry(_lastGpuReport.TelemetryAvailability)}", "只读", _lastGpuReport?.DriverWriteActionsEnabled == true ? "amber" : "green"),
                     ("启动项", snapshot.StartupItems.Count == 0 ? "当前平台未读取到 Windows 启动项，需在 Windows 上验证。" : $"已读取 {snapshot.StartupItems.Count} 个启动项，{snapshot.StartupItems.Count(item => item.ImpactLevel is StartupImpactLevel.High or StartupImpactLevel.Medium)} 个需要复核。", "Windows", snapshot.StartupItems.Count == 0 ? "amber" : "green"),
                     ("电源计划", $"{snapshot.PowerPlan.Name} · {snapshot.PowerPlan.Source}", "只读", snapshot.PowerPlan.IsHighPerformanceCandidate ? "green" : "amber")
                 },
@@ -922,7 +927,7 @@ public partial class MainWindow : Window
             {
                 ("System", $"{snapshot.OperatingSystem.Name} / {snapshot.OperatingSystem.Architecture} / {snapshot.OperatingSystem.DeviceName}", "Live", "green"),
                 ("CPU", snapshot.Hardware.CpuName, "Read-only", "blue"),
-                ("GPU", snapshot.Hardware.GpuName, "Read-only", "blue"),
+                ("GPU Intelligence", _lastGpuReport is null ? snapshot.Hardware.GpuName : $"{_lastGpuReport.Name} · {_lastGpuReport.Vendor} · telemetry: {_lastGpuReport.TelemetryAvailability}", "Read-only", _lastGpuReport?.DriverWriteActionsEnabled == true ? "amber" : "green"),
                 ("Startup Items", snapshot.StartupItems.Count == 0 ? "No Windows startup items were captured on this platform; validate on Windows." : $"Captured {snapshot.StartupItems.Count} startup entries; {snapshot.StartupItems.Count(item => item.ImpactLevel is StartupImpactLevel.High or StartupImpactLevel.Medium)} need review.", "Windows", snapshot.StartupItems.Count == 0 ? "amber" : "green"),
                 ("Power Plan", $"{snapshot.PowerPlan.Name} · {snapshot.PowerPlan.Source}", "Read-only", snapshot.PowerPlan.IsHighPerformanceCandidate ? "green" : "amber")
             },
@@ -1726,6 +1731,41 @@ public partial class MainWindow : Window
             ToolkitAvailability.Preview => "预览",
             ToolkitAvailability.WindowsOnly => "Windows",
             _ => "预留"
+        };
+    }
+
+    private string TranslateGpuVendor(GpuVendor vendor)
+    {
+        if (!IsZh)
+        {
+            return vendor.ToString();
+        }
+
+        return vendor switch
+        {
+            GpuVendor.Nvidia => "NVIDIA",
+            GpuVendor.Amd => "AMD",
+            GpuVendor.Intel => "Intel",
+            GpuVendor.Apple => "Apple",
+            GpuVendor.MicrosoftBasic => "微软基础显示",
+            _ => "未知厂商"
+        };
+    }
+
+    private string TranslateGpuTelemetry(GpuTelemetryAvailability availability)
+    {
+        if (!IsZh)
+        {
+            return availability.ToString();
+        }
+
+        return availability switch
+        {
+            GpuTelemetryAvailability.NameOnly => "仅名称",
+            GpuTelemetryAvailability.DriverOnly => "仅驱动",
+            GpuTelemetryAvailability.Partial => "部分",
+            GpuTelemetryAvailability.Full => "完整",
+            _ => "未知"
         };
     }
 

@@ -29,7 +29,7 @@ Understand -> Analyze -> Explain -> Recommend -> Optimize -> Verify
 Current phase:
 
 ```text
-Phase 08 - Windows Toolkit Center
+Phase 09 - GPU And Driver Intelligence
 ```
 
 The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, core read-only intelligence contracts, first local read-only scanning, and a Windows-first upgrade roadmap aligned against BoosterX and Pavise. Optimization execution is still disabled.
@@ -79,6 +79,7 @@ Current prototype scope:
 - Guarded safe optimization execution simulation with restore point records.
 - Game Boost Mode preview plan generation.
 - Windows Toolkit Center catalog.
+- GPU vendor and driver-write safety intelligence.
 
 No optimization is executed in this prototype.
 
@@ -113,6 +114,7 @@ Core documents:
 - `docs/PHASE-06-SAFE-OPTIMIZATION-EXECUTION-REPORT.md`
 - `docs/PHASE-07-GAME-BOOST-MODE-REPORT.md`
 - `docs/PHASE-08-WINDOWS-TOOLKIT-CENTER-REPORT.md`
+- `docs/PHASE-09-GPU-DRIVER-INTELLIGENCE-REPORT.md`
 
 ## Repository Governance
 

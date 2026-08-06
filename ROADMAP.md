@@ -305,7 +305,32 @@ Remaining:
 - Tool-specific execution.
 - Restore Center persistence.
 
-## Phase 09 - AI Advisor And History
+## Phase 09 - GPU And Driver Intelligence
+
+Status: Completed
+
+Scope:
+
+- Inspect and explain GPU-side constraints before writing driver settings.
+- Detect GPU vendor from read-only GPU identity.
+- Keep driver writes disabled until official APIs and Windows hardware validation exist.
+
+Current deliverables:
+
+- GPU intelligence report model.
+- GPU vendor detection.
+- Telemetry availability model.
+- Driver write actions disabled by policy.
+- PC Intelligence live row integration.
+
+Remaining:
+
+- Driver version.
+- GPU load and temperature.
+- NVIDIA/AMD official API inspection.
+- DLSS capability notes.
+
+## Phase 10 - AI Advisor And History
 
 Status: Planned
 
@@ -315,7 +340,7 @@ Scope:
 - Compare historical scores and session results.
 - Export local reports with private data redaction.
 
-## Phase 10 - Release And Update Infrastructure
+## Phase 11 - Release And Update Infrastructure
 
 Status: Planned
 
