@@ -34,21 +34,22 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="8" />
     </Style>
-    <Style Selector="Border.navItem">
+    <Style Selector="Button.navButton">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+      <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="Padding" Value="12,10" />
       <Setter Property="Margin" Value="0,3" />
-    </Style>
-    <Style Selector="Border.navItem TextBlock">
-      <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
       <Setter Property="FontSize" Value="13" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
-    <Style Selector="Border.navItem.active">
+    <Style Selector="Button.navButton.active">
       <Setter Property="Background" Value="#18283C" />
       <Setter Property="BorderBrush" Value="#294767" />
       <Setter Property="BorderThickness" Value="1" />
-    </Style>
-    <Style Selector="Border.navItem.active TextBlock">
       <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
@@ -107,30 +108,14 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="0,32,0,0">
-          <Border Classes="navItem active">
-            <TextBlock x:Name="NavDashboardText" Text="Dashboard" />
-          </Border>
-          <Border Classes="navItem">
-            <TextBlock x:Name="NavPcIntelligenceText" Text="PC Intelligence" />
-          </Border>
-          <Border Classes="navItem">
-            <TextBlock x:Name="NavGameOptimizationText" Text="Game Optimization" />
-          </Border>
-          <Border Classes="navItem">
-            <TextBlock x:Name="NavPerformanceMonitorText" Text="Performance Monitor" />
-          </Border>
-          <Border Classes="navItem">
-            <TextBlock x:Name="NavOptimizationCenterText" Text="Optimization Center" />
-          </Border>
-          <Border Classes="navItem">
-            <TextBlock x:Name="NavAiAdvisorText" Text="AI Advisor" />
-          </Border>
-          <Border Classes="navItem">
-            <TextBlock x:Name="NavHistoryText" Text="History" />
-          </Border>
-          <Border Classes="navItem">
-            <TextBlock x:Name="NavSettingsText" Text="Settings" />
-          </Border>
+          <Button x:Name="NavDashboardButton" Classes="navButton active" Click="OnNavigateClicked" Tag="dashboard" Content="Dashboard" />
+          <Button x:Name="NavPcIntelligenceButton" Classes="navButton" Click="OnNavigateClicked" Tag="pc" Content="PC Intelligence" />
+          <Button x:Name="NavGameOptimizationButton" Classes="navButton" Click="OnNavigateClicked" Tag="game" Content="Game Optimization" />
+          <Button x:Name="NavPerformanceMonitorButton" Classes="navButton" Click="OnNavigateClicked" Tag="monitor" Content="Performance Monitor" />
+          <Button x:Name="NavOptimizationCenterButton" Classes="navButton" Click="OnNavigateClicked" Tag="optimization" Content="Optimization Center" />
+          <Button x:Name="NavAiAdvisorButton" Classes="navButton" Click="OnNavigateClicked" Tag="advisor" Content="AI Advisor" />
+          <Button x:Name="NavHistoryButton" Classes="navButton" Click="OnNavigateClicked" Tag="history" Content="History" />
+          <Button x:Name="NavSettingsButton" Classes="navButton" Click="OnNavigateClicked" Tag="settings" Content="Settings" />
         </StackPanel>
 
         <Border Grid.Row="2" Classes="card" Padding="14">
@@ -159,7 +144,7 @@
         </StackPanel>
       </Grid>
 
-      <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="12" Margin="0,22,0,16">
+      <Grid x:Name="MetricsGrid" Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="12" Margin="0,22,0,16">
         <Border Classes="card" Padding="16">
           <StackPanel Spacing="7">
             <TextBlock Text="CPU" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
@@ -202,7 +187,7 @@
         </Border>
       </Grid>
 
-      <Grid Grid.Row="2" ColumnDefinitions="1.1*,0.9*" ColumnSpacing="16">
+      <Grid x:Name="DashboardMainGrid" Grid.Row="2" ColumnDefinitions="1.1*,0.9*" ColumnSpacing="16">
         <Border Classes="card" Padding="20">
           <StackPanel Spacing="14">
             <StackPanel>
@@ -254,7 +239,7 @@
         </Border>
       </Grid>
 
-      <Border Grid.Row="3" Classes="card" Padding="16" Margin="0,16,0,0">
+      <Border x:Name="TipsCard" Grid.Row="3" Classes="card" Padding="16" Margin="0,16,0,0">
         <Grid ColumnDefinitions="Auto,*">
           <Border Width="42" Height="42" CornerRadius="8" Background="#16283C">
             <TextBlock Text="AI" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource BlueBrush}" />
@@ -265,6 +250,8 @@
           </StackPanel>
         </Grid>
       </Border>
+
+      <ContentControl x:Name="ModuleContent" Grid.Row="1" Grid.RowSpan="3" IsVisible="False" />
     </Grid>
 
     <Border Grid.Column="2" Background="#07101A" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0" Padding="20,22">

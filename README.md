@@ -44,7 +44,7 @@ Phase 00 establishes the product foundation only. It does not include production
 
 ## Run The Prototype
 
-Phase 01 includes a runnable Avalonia desktop shell with simulated performance data.
+Phase 02 includes a runnable Avalonia desktop shell with clickable module pages and simulated, read-only capability previews.
 
 Requirements:
 
@@ -61,9 +61,10 @@ Current prototype scope:
 
 - Desktop shell.
 - BoosterX-inspired dark performance dashboard.
-- Static navigation.
+- Clickable navigation modules.
 - Simulated performance metrics.
 - Simulated AI optimization queue.
+- Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, AI advisor, history, and settings.
 
 No real system scanning or optimization is executed in this prototype.
 
@@ -80,6 +81,7 @@ Core documents:
 - `docs/MILESTONES.md`
 - `docs/PHASE-00-REPORT.md`
 - `docs/PHASE-01-REPORT.md`
+- `docs/PHASE-02-REPORT.md`
 
 ## Repository Governance
 

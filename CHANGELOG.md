@@ -34,3 +34,17 @@ This project follows phase-based development. Each completed phase must include 
 - Added Simplified Chinese and English UI switching.
 - Set Simplified Chinese as the default prototype language.
 - Reduced the AI Performance Core ring size and stroke weight.
+
+## [0.2.0] - Phase 02 Module Activation
+
+### Added
+
+- Clickable left navigation.
+- Module pages for PC Intelligence, Game Optimization, Performance Monitor, Optimization Center, AI Advisor, History, and Settings.
+- Read-only capability cards for each module.
+- Low-overhead planning notes in Performance Monitor and Settings pages.
+
+### Changed
+
+- Updated right-side phase preview copy to Phase 02.
+- Preserved dashboard as the default landing page.

@@ -29,6 +29,18 @@ Scope:
 - No production optimization features.
 - No real system data collection.
 
+## Phase 02 - Module Activation
+
+Status: Completed
+
+Scope:
+
+- Left navigation becomes clickable.
+- All main modules render dedicated pages.
+- Module content remains read-only and simulated.
+- Low-overhead operating rules are visible in Settings and Monitor views.
+- No real system scanning, background service, or optimization execution is added.
+
 ## Future Product Expansion
 
 The architecture reserves space for future AETHER product lines:
