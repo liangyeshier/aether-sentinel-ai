@@ -332,13 +332,27 @@ Remaining:
 
 ## Phase 10 - AI Advisor And History
 
-Status: Planned
+Status: Completed
 
 Scope:
 
 - Generate natural-language performance explanations.
 - Compare historical scores and session results.
 - Export local reports with private data redaction.
+
+Current deliverables:
+
+- Advisor report model.
+- Advisor report generator.
+- AI Advisor report action.
+- Local redacted history summaries.
+- History page result cards.
+
+Remaining:
+
+- Cloud AI provider integration.
+- Full report export UI.
+- Configurable retention policy.
 
 ## Phase 11 - Release And Update Infrastructure
 

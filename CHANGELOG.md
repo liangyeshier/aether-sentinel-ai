@@ -4,6 +4,22 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.10.0] - Phase 10 AI Advisor And History
+
+### Added
+
+- Advisor report model.
+- Advisor finding and recommendation models.
+- Advisor history record model.
+- Local Advisor report generator.
+- AI Advisor page report action.
+- Local redacted history summaries and History page cards.
+- Phase 10 completion report.
+
+### Changed
+
+- AI Advisor now generates local template-based reports from scan, network, game, monitor, GPU, Dry Run, and execution simulation data.
+
 ## [0.9.0] - Phase 09 GPU And Driver Intelligence
 
 ### Added

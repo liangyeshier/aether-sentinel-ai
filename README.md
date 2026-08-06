@@ -29,7 +29,7 @@ Understand -> Analyze -> Explain -> Recommend -> Optimize -> Verify
 Current phase:
 
 ```text
-Phase 09 - GPU And Driver Intelligence
+Phase 10 - AI Advisor And History
 ```
 
 The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, core read-only intelligence contracts, first local read-only scanning, and a Windows-first upgrade roadmap aligned against BoosterX and Pavise. Optimization execution is still disabled.
@@ -80,6 +80,7 @@ Current prototype scope:
 - Game Boost Mode preview plan generation.
 - Windows Toolkit Center catalog.
 - GPU vendor and driver-write safety intelligence.
+- Local AI Advisor report generation and redacted history summaries.
 
 No optimization is executed in this prototype.
 
@@ -115,6 +116,7 @@ Core documents:
 - `docs/PHASE-07-GAME-BOOST-MODE-REPORT.md`
 - `docs/PHASE-08-WINDOWS-TOOLKIT-CENTER-REPORT.md`
 - `docs/PHASE-09-GPU-DRIVER-INTELLIGENCE-REPORT.md`
+- `docs/PHASE-10-AI-ADVISOR-HISTORY-REPORT.md`
 
 ## Repository Governance
 

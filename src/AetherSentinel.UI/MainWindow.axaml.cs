@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using AetherSentinel.Core.Advisor;
 using AetherSentinel.Core.Analysis;
 using AetherSentinel.Core.Gaming;
 using AetherSentinel.Core.Gpu;
@@ -37,7 +38,9 @@ public partial class MainWindow : Window
     private readonly ILowOverheadMonitor _lowOverheadMonitor = new LocalLowOverheadMonitor();
     private readonly IOptimizationDryRunEngine _optimizationDryRunEngine = new OptimizationDryRunEngine();
     private readonly IOptimizationExecutionEngine _optimizationExecutionEngine = new OptimizationExecutionEngine();
+    private readonly IAdvisorReportGenerator _advisorReportGenerator = new AdvisorReportGenerator();
     private readonly List<GameLibraryEntry> _gameLibrary = LoadGameLibrary().ToList();
+    private readonly List<AdvisorHistoryRecord> _advisorHistory = LoadAdvisorHistory().ToList();
     private SystemSnapshot? _lastSnapshot;
     private PerformanceAnalysisReport? _lastReport;
     private NetworkDiagnosticsReport? _lastNetworkDiagnostics;
@@ -47,10 +50,12 @@ public partial class MainWindow : Window
     private OptimizationDryRunReport? _lastDryRunReport;
     private OptimizationExecutionReport? _lastExecutionReport;
     private GpuIntelligenceReport? _lastGpuReport;
+    private AdvisorReport? _lastAdvisorReport;
     private TextBlock? _networkSpeedStatusText;
     private TextBlock? _gameSessionStatusText;
     private TextBlock? _monitorStatusText;
     private TextBlock? _dryRunStatusText;
+    private TextBlock? _advisorStatusText;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -310,6 +315,37 @@ public partial class MainWindow : Window
         CurrentStateBodyTitleText.Text = IsZh ? "安全执行模拟完成" : "Safe execution simulation complete";
         CurrentStateBodyText.Text = FormatExecutionSummary(_lastExecutionReport);
         NavigateTo("optimization");
+    }
+
+    private void OnGenerateAdvisorReportClicked(object? sender, RoutedEventArgs e)
+    {
+        _lastAdvisorReport = _advisorReportGenerator.Generate(
+            new AdvisorReportContext(
+                Snapshot: _lastSnapshot,
+                PerformanceReport: _lastReport,
+                NetworkReport: _lastNetworkDiagnostics,
+                GameSession: _lastGameSessionAnalysis,
+                GameBoostPlan: _lastGameBoostPlan,
+                MonitorSnapshot: _lastMonitorSnapshot,
+                GpuReport: _lastGpuReport,
+                DryRunReport: _lastDryRunReport,
+                ExecutionReport: _lastExecutionReport));
+
+        var historyRecord = new AdvisorHistoryRecord(
+            Id: _lastAdvisorReport.Id,
+            CreatedAt: _lastAdvisorReport.GeneratedAt,
+            Summary: _lastAdvisorReport.Summary,
+            FindingCount: _lastAdvisorReport.Findings.Count,
+            RecommendationCount: _lastAdvisorReport.Recommendations.Count,
+            PrivacyRedactionApplied: _lastAdvisorReport.PrivacyRedactionApplied);
+        _advisorHistory.Insert(0, historyRecord);
+        SaveAdvisorHistory(_advisorHistory.Take(50).ToArray());
+
+        CurrentStateBodyTitleText.Text = IsZh ? "AI 顾问报告已生成" : "AI Advisor report generated";
+        CurrentStateBodyText.Text = IsZh
+            ? $"生成 {_lastAdvisorReport.Findings.Count} 条发现和 {_lastAdvisorReport.Recommendations.Count} 条建议，已保存历史摘要。"
+            : $"Generated {_lastAdvisorReport.Findings.Count} findings and {_lastAdvisorReport.Recommendations.Count} recommendations; history summary saved.";
+        NavigateTo("advisor");
     }
 
     private void SetLanguage(string language)
@@ -638,7 +674,7 @@ public partial class MainWindow : Window
             grid.Children.Add(card);
         }
 
-        if (page is "speed" or "game" or "monitor" or "optimization")
+        if (page is "speed" or "game" or "monitor" or "optimization" or "advisor" or "history")
         {
             return new ScrollViewer
             {
@@ -653,7 +689,9 @@ public partial class MainWindow : Window
                             "speed" => CreateNetworkSpeedActionPanel(),
                             "game" => CreateGameSessionActionPanel(),
                             "monitor" => CreateMonitorActionPanel(),
-                            _ => CreateDryRunActionPanel()
+                            "optimization" => CreateDryRunActionPanel(),
+                            "advisor" => CreateAdvisorActionPanel(),
+                            _ => CreateHistoryActionPanel()
                         },
                         grid
                     }
@@ -708,6 +746,16 @@ public partial class MainWindow : Window
         if (page == "toolkit")
         {
             return GetToolkitRows();
+        }
+
+        if (page == "advisor" && _lastAdvisorReport is not null)
+        {
+            return GetAdvisorRows(_lastAdvisorReport);
+        }
+
+        if (page == "history")
+        {
+            return GetHistoryRows();
         }
 
         if (_lastSnapshot is not null)
@@ -1324,6 +1372,94 @@ public partial class MainWindow : Window
         };
     }
 
+    private Control CreateAdvisorActionPanel()
+    {
+        _advisorStatusText = new TextBlock
+        {
+            Text = _lastAdvisorReport is null
+                ? (IsZh
+                    ? "生成本地 AI 顾问报告：只使用本机结构化结果，不上传硬件信息。"
+                    : "Generate a local AI Advisor report from structured local results without uploading hardware data.")
+                : (IsZh
+                    ? $"最近报告：{_lastAdvisorReport.Findings.Count} 条发现，{_lastAdvisorReport.Recommendations.Count} 条建议。"
+                    : $"Latest report: {_lastAdvisorReport.Findings.Count} findings, {_lastAdvisorReport.Recommendations.Count} recommendations."),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var button = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "生成报告" : "Generate Report",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        button.Click += OnGenerateAdvisorReportClicked;
+        Grid.SetColumn(button, 1);
+
+        return CreateActionPanel(IsZh ? "AI 顾问控制" : "AI Advisor Control", _advisorStatusText, button);
+    }
+
+    private Control CreateHistoryActionPanel()
+    {
+        var status = new TextBlock
+        {
+            Text = IsZh
+                ? $"本地历史摘要 {_advisorHistory.Count} 条。仅保存脱敏摘要，不保存公网 IP 或私有密钥。"
+                : $"{_advisorHistory.Count} local history summaries. Redacted summaries only; no public IP or private secret storage.",
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var button = new Button
+        {
+            Classes = { "secondary" },
+            Content = IsZh ? "刷新" : "Refresh",
+            MinWidth = 92,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        button.Click += (_, _) => NavigateTo("history");
+        Grid.SetColumn(button, 1);
+
+        return CreateActionPanel(IsZh ? "历史记录控制" : "History Control", status, button);
+    }
+
+    private Border CreateActionPanel(string title, TextBlock status, Control action)
+    {
+        return new Border
+        {
+            Classes = { "card" },
+            Padding = new Thickness(18),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                ColumnSpacing = 16,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Spacing = 7,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = title,
+                                FontSize = 18,
+                                FontWeight = FontWeight.SemiBold
+                            },
+                            status
+                        }
+                    },
+                    action
+                }
+            }
+        };
+    }
+
     private (string Title, string Body, string Badge, string Accent)[] GetNetworkDiagnosticRows(NetworkDiagnosticsReport report)
     {
         var bestLatency = report.LatencyResults
@@ -1489,6 +1625,39 @@ public partial class MainWindow : Window
                     : $"Purpose: {item.Purpose} Risk: {item.Risk} Revert: {item.RevertPath}",
                 Badge: IsZh ? TranslateToolkitAvailability(item.Availability) : item.Availability.ToString(),
                 Accent: GetToolkitAccent(item.Availability)))
+            .ToArray();
+    }
+
+    private (string Title, string Body, string Badge, string Accent)[] GetAdvisorRows(AdvisorReport report)
+    {
+        return report.Findings
+            .Take(4)
+            .Select(finding => (
+                Title: IsZh ? TranslateAdvisorFindingTitle(finding.Title) : finding.Title,
+                Body: IsZh ? TranslateAdvisorDetail(finding.Detail) : finding.Detail,
+                Badge: IsZh ? TranslateAdvisorSeverity(finding.Severity) : finding.Severity.ToString(),
+                Accent: GetAdvisorAccent(finding.Severity)))
+            .ToArray();
+    }
+
+    private (string Title, string Body, string Badge, string Accent)[] GetHistoryRows()
+    {
+        if (_advisorHistory.Count == 0)
+        {
+            return IsZh
+                ? [("暂无历史", "生成 AI 顾问报告后，这里会保存本地脱敏摘要。", "空", "amber")]
+                : [("No History", "Generate an AI Advisor report to save a local redacted summary here.", "Empty", "amber")];
+        }
+
+        return _advisorHistory
+            .Take(4)
+            .Select(record => (
+                Title: IsZh ? $"报告 {record.CreatedAt:MM-dd HH:mm}" : $"Report {record.CreatedAt:MM-dd HH:mm}",
+                Body: IsZh
+                    ? $"发现 {record.FindingCount} 条，建议 {record.RecommendationCount} 条。隐私脱敏：{(record.PrivacyRedactionApplied ? "是" : "否")}。"
+                    : $"{record.FindingCount} findings, {record.RecommendationCount} recommendations. Privacy redacted: {record.PrivacyRedactionApplied}.",
+                Badge: IsZh ? "本地" : "Local",
+                Accent: "green"))
             .ToArray();
     }
 
@@ -1769,6 +1938,48 @@ public partial class MainWindow : Window
         };
     }
 
+    private string TranslateAdvisorFindingTitle(string title)
+    {
+        return title switch
+        {
+            "No local report data" => "暂无本地报告数据",
+            "Performance score" => "性能评分",
+            "Network quick test" => "网络轻量测试",
+            "Game session" => "游戏会话",
+            "AETHER overhead" => "AETHER 自身占用",
+            "GPU intelligence" => "GPU 智能",
+            "Optimization Dry Run" => "优化 Dry Run",
+            _ => title
+        };
+    }
+
+    private string TranslateAdvisorDetail(string detail)
+    {
+        return detail
+            .Replace("Local advisor report generated", "本地顾问报告已生成", StringComparison.OrdinalIgnoreCase)
+            .Replace("Private identifiers are redacted by default.", "默认会脱敏私有标识。", StringComparison.OrdinalIgnoreCase)
+            .Replace("Current score is", "当前评分", StringComparison.OrdinalIgnoreCase)
+            .Replace("optimization potential", "优化潜力", StringComparison.OrdinalIgnoreCase)
+            .Replace("AETHER CPU estimate", "AETHER CPU 估算", StringComparison.OrdinalIgnoreCase)
+            .Replace("memory", "内存", StringComparison.OrdinalIgnoreCase)
+            .Replace("telemetry", "遥测", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string TranslateAdvisorSeverity(AdvisorSeverity severity)
+    {
+        if (!IsZh)
+        {
+            return severity.ToString();
+        }
+
+        return severity switch
+        {
+            AdvisorSeverity.Risk => "风险",
+            AdvisorSeverity.Watch => "关注",
+            _ => "信息"
+        };
+    }
+
     private static string GetNetworkAccent(NetworkQualityLevel qualityLevel)
     {
         return qualityLevel switch
@@ -1887,6 +2098,16 @@ public partial class MainWindow : Window
         };
     }
 
+    private static string GetAdvisorAccent(AdvisorSeverity severity)
+    {
+        return severity switch
+        {
+            AdvisorSeverity.Risk => "red",
+            AdvisorSeverity.Watch => "amber",
+            _ => "green"
+        };
+    }
+
     private static IReadOnlyList<GameLibraryEntry> LoadGameLibrary()
     {
         try
@@ -1918,6 +2139,39 @@ public partial class MainWindow : Window
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         return Path.Combine(appData, "AETHER AGENTIC Studio", "AETHER SENTINEL AI", "game-library.json");
+    }
+
+    private static IReadOnlyList<AdvisorHistoryRecord> LoadAdvisorHistory()
+    {
+        try
+        {
+            var path = GetAdvisorHistoryPath();
+            if (!File.Exists(path))
+            {
+                return [];
+            }
+
+            var json = File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<AdvisorHistoryRecord>>(json) ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static void SaveAdvisorHistory(IReadOnlyList<AdvisorHistoryRecord> entries)
+    {
+        var path = GetAdvisorHistoryPath();
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var json = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(path, json);
+    }
+
+    private static string GetAdvisorHistoryPath()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return Path.Combine(appData, "AETHER AGENTIC Studio", "AETHER SENTINEL AI", "advisor-history.json");
     }
 
     private Border CreateModuleCard(string title, string body, string badge, string accent)
