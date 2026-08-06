@@ -209,7 +209,7 @@ Remaining:
 
 ## Phase 05 - Optimization Rule Engine Dry Run
 
-Status: Planned
+Status: Completed
 
 Scope:
 
@@ -217,6 +217,20 @@ Scope:
 - Support dry-run previews before any real change.
 - Require risk level, backup method, verification signal, and rollback method for every rule.
 - Keep all execution disabled until rules pass validation.
+
+Current deliverables:
+
+- Optimization rule model.
+- Default rule catalog.
+- Dry-run engine.
+- Optimization Center action button.
+- Live dry-run result cards.
+
+Remaining:
+
+- Execution layer.
+- More precise Windows calibration.
+- Blocked-state policy enforcement.
 
 ## Phase 06 - Safe Optimization Execution
 

@@ -8,6 +8,7 @@ using AetherSentinel.Core.Analysis;
 using AetherSentinel.Core.Gaming;
 using AetherSentinel.Core.Monitoring;
 using AetherSentinel.Core.Network;
+using AetherSentinel.Core.Optimization;
 using AetherSentinel.Core.Performance;
 using AetherSentinel.Core.Scanning;
 using AetherSentinel.Platforms.Network;
@@ -30,15 +31,18 @@ public partial class MainWindow : Window
     private readonly INetworkDiagnosticsProvider _networkDiagnosticsProvider = new LocalNetworkDiagnosticsProvider();
     private readonly IGameSessionAnalyzer _gameSessionAnalyzer = new GameSessionAnalyzer();
     private readonly ILowOverheadMonitor _lowOverheadMonitor = new LocalLowOverheadMonitor();
+    private readonly IOptimizationDryRunEngine _optimizationDryRunEngine = new OptimizationDryRunEngine();
     private readonly List<GameLibraryEntry> _gameLibrary = LoadGameLibrary().ToList();
     private SystemSnapshot? _lastSnapshot;
     private PerformanceAnalysisReport? _lastReport;
     private NetworkDiagnosticsReport? _lastNetworkDiagnostics;
     private GameSessionAnalysis? _lastGameSessionAnalysis;
     private MonitorSnapshot? _lastMonitorSnapshot;
+    private OptimizationDryRunReport? _lastDryRunReport;
     private TextBlock? _networkSpeedStatusText;
     private TextBlock? _gameSessionStatusText;
     private TextBlock? _monitorStatusText;
+    private TextBlock? _dryRunStatusText;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -249,6 +253,18 @@ public partial class MainWindow : Window
                 finalButton.Content = IsZh ? "采样一次" : "Sample Once";
             }
         }
+    }
+
+    private void OnGenerateDryRunClicked(object? sender, RoutedEventArgs e)
+    {
+        _lastDryRunReport = _optimizationDryRunEngine.Generate(
+            _lastSnapshot,
+            _lastNetworkDiagnostics,
+            _lastGameSessionAnalysis);
+
+        CurrentStateBodyTitleText.Text = IsZh ? "Dry Run 已生成" : "Dry Run generated";
+        CurrentStateBodyText.Text = FormatDryRunSummary(_lastDryRunReport);
+        NavigateTo("optimization");
     }
 
     private void SetLanguage(string language)
@@ -572,7 +588,7 @@ public partial class MainWindow : Window
             grid.Children.Add(card);
         }
 
-        if (page is "speed" or "game" or "monitor")
+        if (page is "speed" or "game" or "monitor" or "optimization")
         {
             return new ScrollViewer
             {
@@ -586,7 +602,8 @@ public partial class MainWindow : Window
                         {
                             "speed" => CreateNetworkSpeedActionPanel(),
                             "game" => CreateGameSessionActionPanel(),
-                            _ => CreateMonitorActionPanel()
+                            "monitor" => CreateMonitorActionPanel(),
+                            _ => CreateDryRunActionPanel()
                         },
                         grid
                     }
@@ -616,6 +633,11 @@ public partial class MainWindow : Window
         if (page == "monitor" && _lastMonitorSnapshot is not null)
         {
             return GetMonitorRows(_lastMonitorSnapshot);
+        }
+
+        if (page == "optimization" && _lastDryRunReport is not null)
+        {
+            return GetDryRunRows(_lastDryRunReport);
         }
 
         if (page == "dns" && _lastNetworkDiagnostics is not null)
@@ -1155,6 +1177,61 @@ public partial class MainWindow : Window
         };
     }
 
+    private Control CreateDryRunActionPanel()
+    {
+        _dryRunStatusText = new TextBlock
+        {
+            Text = _lastDryRunReport is null
+                ? (IsZh
+                    ? "生成优化 Dry Run：只预览规则、风险、备份、验证和回滚，不执行任何系统修改。"
+                    : "Generate optimization Dry Run: preview rules, risk, backup, verification, and rollback without changing the system.")
+                : FormatDryRunSummary(_lastDryRunReport),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var button = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "生成 Dry Run" : "Generate Dry Run",
+            MinWidth = 132,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        button.Click += OnGenerateDryRunClicked;
+        Grid.SetColumn(button, 1);
+
+        return new Border
+        {
+            Classes = { "card" },
+            Padding = new Thickness(18),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                ColumnSpacing = 16,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Spacing = 7,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = IsZh ? "优化规则预演" : "Optimization Rule Dry Run",
+                                FontSize = 18,
+                                FontWeight = FontWeight.SemiBold
+                            },
+                            _dryRunStatusText
+                        }
+                    },
+                    button
+                }
+            }
+        };
+    }
+
     private (string Title, string Body, string Badge, string Accent)[] GetNetworkDiagnosticRows(NetworkDiagnosticsReport report)
     {
         var bestLatency = report.LatencyResults
@@ -1260,6 +1337,27 @@ public partial class MainWindow : Window
         };
     }
 
+    private (string Title, string Body, string Badge, string Accent)[] GetDryRunRows(OptimizationDryRunReport report)
+    {
+        var previews = report.Previews.Take(4).ToArray();
+        if (previews.Length == 0)
+        {
+            return IsZh
+                ? [("Dry Run", "暂无规则预览。", "空", "amber")]
+                : [("Dry Run", "No rule previews.", "Empty", "amber")];
+        }
+
+        return previews
+            .Select(preview => (
+                Title: IsZh ? TranslateRuleName(preview.Rule) : preview.Rule.Name,
+                Body: IsZh
+                    ? $"{TranslatePreviewState(preview.State)}：{preview.Reason} 备份：{preview.Rule.BackupMethod} 回滚：{preview.Rule.RollbackMethod}"
+                    : $"{preview.State}: {preview.Reason} Backup: {preview.Rule.BackupMethod} Rollback: {preview.Rule.RollbackMethod}",
+                Badge: IsZh ? TranslatePreviewState(preview.State) : preview.State.ToString(),
+                Accent: GetPreviewAccent(preview.State)))
+            .ToArray();
+    }
+
     private string FormatNetworkDiagnosticsSummary(NetworkDiagnosticsReport report)
     {
         if (!IsZh)
@@ -1339,6 +1437,35 @@ public partial class MainWindow : Window
         };
     }
 
+    private string TranslateRuleName(OptimizationRule rule)
+    {
+        return rule.Category switch
+        {
+            OptimizationRuleCategory.Dns => "DNS 候选切换",
+            OptimizationRuleCategory.Startup => "启动项复核",
+            OptimizationRuleCategory.PowerPlan => "游戏电源计划",
+            OptimizationRuleCategory.BackgroundPressure => "后台压力复核",
+            OptimizationRuleCategory.Cleanup => "临时清理预览",
+            OptimizationRuleCategory.GameFocus => "游戏专注策略",
+            _ => rule.Name
+        };
+    }
+
+    private string TranslatePreviewState(OptimizationRulePreviewState state)
+    {
+        if (!IsZh)
+        {
+            return state.ToString();
+        }
+
+        return state switch
+        {
+            OptimizationRulePreviewState.Eligible => "可预演",
+            OptimizationRulePreviewState.Blocked => "已阻止",
+            _ => "需更多数据"
+        };
+    }
+
     private static string GetNetworkAccent(NetworkQualityLevel qualityLevel)
     {
         return qualityLevel switch
@@ -1391,6 +1518,26 @@ public partial class MainWindow : Window
         }
 
         return $"AETHER CPU {snapshot.AppCpuPercent:0.00}%，内存 {snapshot.AppMemoryMb} MB，进程数 {snapshot.ProcessCount}。";
+    }
+
+    private string FormatDryRunSummary(OptimizationDryRunReport report)
+    {
+        if (!IsZh)
+        {
+            return report.Summary;
+        }
+
+        return $"已生成 {report.Previews.Count} 条规则预览：{report.EligibleCount} 条可预演，{report.BlockedCount} 条被阻止；不会执行系统修改。";
+    }
+
+    private static string GetPreviewAccent(OptimizationRulePreviewState state)
+    {
+        return state switch
+        {
+            OptimizationRulePreviewState.Eligible => "green",
+            OptimizationRulePreviewState.Blocked => "red",
+            _ => "amber"
+        };
     }
 
     private static IReadOnlyList<GameLibraryEntry> LoadGameLibrary()

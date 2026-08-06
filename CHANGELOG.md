@@ -4,6 +4,21 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.5.0] - Phase 05 Optimization Rule Engine Dry Run
+
+### Added
+
+- Optimization rule model.
+- Default optimization rule catalog.
+- Dry-run report and preview models.
+- Optimization dry-run engine.
+- Optimization Center action button and live preview cards.
+- Phase 05 completion report.
+
+### Changed
+
+- Optimization Center now previews safe rules without executing system changes.
+
 ## [0.4.0] - Phase 04 Low-overhead Performance Monitor
 
 ### Added
