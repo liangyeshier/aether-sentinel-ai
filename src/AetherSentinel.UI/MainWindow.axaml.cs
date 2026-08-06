@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using System.Threading;
 using AetherSentinel.Core.Analysis;
+using AetherSentinel.Core.Network;
 using AetherSentinel.Core.Performance;
 using AetherSentinel.Core.Scanning;
+using AetherSentinel.Platforms.Network;
 using AetherSentinel.Platforms.Scanning;
 using Avalonia;
 using Avalonia.Controls;
@@ -18,8 +20,11 @@ public partial class MainWindow : Window
 {
     private readonly ISystemScanner _systemScanner = new PlatformSystemScanner(new LocalPlatformSystemAdapter());
     private readonly IPerformanceAnalyzer _performanceAnalyzer = new PerformanceAnalyzer();
+    private readonly INetworkDiagnosticsProvider _networkDiagnosticsProvider = new LocalNetworkDiagnosticsProvider();
     private SystemSnapshot? _lastSnapshot;
     private PerformanceAnalysisReport? _lastReport;
+    private NetworkDiagnosticsReport? _lastNetworkDiagnostics;
+    private TextBlock? _networkSpeedStatusText;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -79,6 +84,51 @@ public partial class MainWindow : Window
         {
             ScanButton.IsEnabled = true;
             ScanButton.Content = IsZh ? "扫描" : "Scan";
+        }
+    }
+
+    private async void OnNetworkSpeedTestClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button startButton)
+        {
+            startButton.IsEnabled = false;
+            startButton.Content = IsZh ? "测试中" : "Testing";
+        }
+
+        if (_networkSpeedStatusText is not null)
+        {
+            _networkSpeedStatusText.Text = IsZh
+                ? "正在执行轻量 Ping/Jitter 与 DNS 基准测试，不进行下载测速。"
+                : "Running quick Ping/Jitter and DNS benchmark without download traffic.";
+        }
+
+        try
+        {
+            _lastNetworkDiagnostics = await _networkDiagnosticsProvider.RunQuickDiagnosticsAsync(
+                CreateNetworkDiagnosticsRequest(),
+                CancellationToken.None);
+
+            CurrentStateBodyTitleText.Text = IsZh ? "网络测速完成" : "Network test complete";
+            CurrentStateBodyText.Text = FormatNetworkDiagnosticsSummary(_lastNetworkDiagnostics);
+            NavigateTo("speed");
+        }
+        catch (Exception exception)
+        {
+            if (_networkSpeedStatusText is not null)
+            {
+                _networkSpeedStatusText.Text = exception.Message;
+            }
+
+            CurrentStateBodyTitleText.Text = IsZh ? "网络测速失败" : "Network test failed";
+            CurrentStateBodyText.Text = exception.Message;
+        }
+        finally
+        {
+            if (sender is Button finalButton)
+            {
+                finalButton.IsEnabled = true;
+                finalButton.Content = IsZh ? "开始轻量测速" : "Run Quick Test";
+            }
         }
     }
 
@@ -403,6 +453,23 @@ public partial class MainWindow : Window
             grid.Children.Add(card);
         }
 
+        if (page == "speed")
+        {
+            return new ScrollViewer
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Content = new StackPanel
+                {
+                    Spacing = 14,
+                    Children =
+                    {
+                        CreateNetworkSpeedActionPanel(),
+                        grid
+                    }
+                }
+            };
+        }
+
         return new ScrollViewer
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
@@ -412,6 +479,16 @@ public partial class MainWindow : Window
 
     private (string Title, string Body, string Badge, string Accent)[] GetModuleRows(string page)
     {
+        if (page == "speed" && _lastNetworkDiagnostics is not null)
+        {
+            return GetNetworkDiagnosticRows(_lastNetworkDiagnostics);
+        }
+
+        if (page == "dns" && _lastNetworkDiagnostics is not null)
+        {
+            return GetDnsDiagnosticRows(_lastNetworkDiagnostics);
+        }
+
         if (_lastSnapshot is not null)
         {
             var liveRows = GetLiveModuleRows(page, _lastSnapshot);
@@ -693,6 +770,198 @@ public partial class MainWindow : Window
             >= 85 => "green",
             >= 70 => "amber",
             _ => "red"
+        };
+    }
+
+    private NetworkDiagnosticsRequest CreateNetworkDiagnosticsRequest()
+    {
+        var targets = new[]
+        {
+            new NetworkLatencyTarget("360 Secure DNS A", "101.226.4.6", "China Mainland", "360"),
+            new NetworkLatencyTarget("360 Secure DNS B", "218.30.118.6", "China Mainland", "360"),
+            new NetworkLatencyTarget("Public China Baseline", "223.5.5.5", "China Mainland", "AliDNS"),
+            new NetworkLatencyTarget("Public China Baseline 2", "119.29.29.29", "China Mainland", "DNSPod")
+        };
+
+        var dnsCandidates = NetworkProviderCatalog.DefaultDnsCandidates
+            .Where(candidate => candidate.OfficialEndpointConfirmed && candidate.Addresses.Count > 0)
+            .ToArray();
+
+        return new NetworkDiagnosticsRequest(
+            SampleCount: 4,
+            Timeout: TimeSpan.FromSeconds(2),
+            LatencyTargets: targets,
+            DnsCandidates: dnsCandidates,
+            DnsLookupDomain: "www.qq.com");
+    }
+
+    private Control CreateNetworkSpeedActionPanel()
+    {
+        _networkSpeedStatusText = new TextBlock
+        {
+            Text = _lastNetworkDiagnostics is null
+                ? (IsZh
+                    ? "点击开始轻量测速：只执行 Ping/Jitter 与 DNS 查询基准测试，不进行下载/上传测速。"
+                    : "Run a quick test: Ping/Jitter and DNS lookup benchmark only, without download/upload traffic.")
+                : FormatNetworkDiagnosticsSummary(_lastNetworkDiagnostics),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var button = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "开始轻量测速" : "Run Quick Test",
+            MinWidth = 132,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        button.Click += OnNetworkSpeedTestClicked;
+        Grid.SetColumn(button, 1);
+
+        return new Border
+        {
+            Classes = { "card" },
+            Padding = new Thickness(18),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                ColumnSpacing = 16,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Spacing = 7,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = IsZh ? "网络测速控制" : "Network Test Control",
+                                FontSize = 18,
+                                FontWeight = FontWeight.SemiBold
+                            },
+                            _networkSpeedStatusText
+                        }
+                    },
+                    button
+                }
+            }
+        };
+    }
+
+    private (string Title, string Body, string Badge, string Accent)[] GetNetworkDiagnosticRows(NetworkDiagnosticsReport report)
+    {
+        var bestLatency = report.LatencyResults
+            .Where(result => result.FailureRatePercent < 100)
+            .OrderBy(result => result.AverageLatencyMs)
+            .FirstOrDefault();
+        var bestDns = report.DnsBenchmarkResults
+            .Where(result => result.FailureRatePercent < 100)
+            .OrderBy(result => result.AverageLatencyMs)
+            .FirstOrDefault();
+        var dns360 = report.DnsBenchmarkResults.FirstOrDefault(result => result.Resolver.Provider == "360");
+
+        if (IsZh)
+        {
+            return new[]
+            {
+                ("轻量测速结果", FormatNetworkDiagnosticsSummary(report), "真实", GetNetworkAccent(report.SpeedResult.QualityLevel)),
+                ("最佳延迟节点", bestLatency is null ? "未获得可用 Ping 结果。" : $"{bestLatency.Name} · {bestLatency.AverageLatencyMs:0.0} ms · 抖动 {bestLatency.JitterMs:0.0} ms · 失败率 {bestLatency.FailureRatePercent:0.0}%", "Ping", bestLatency is null ? "red" : GetNetworkAccent(bestLatency.QualityLevel)),
+                ("360 DNS 基准", dns360 is null ? "360 DNS 尚未返回有效基准结果。" : $"{dns360.Resolver.Name} · 解析 {dns360.AverageLatencyMs:0.0} ms · 抖动 {dns360.JitterMs:0.0} ms · 失败率 {dns360.FailureRatePercent:0.0}%", "DNS", dns360 is null ? "amber" : GetDnsAccent(dns360.Recommendation)),
+                ("最佳 DNS 候选", bestDns is null ? "未获得可推荐 DNS，暂不建议切换。" : $"{bestDns.Resolver.Name} · 推荐级别 {TranslateDnsRecommendation(bestDns.Recommendation)}。真实切换仍需备份与确认。", "推荐", bestDns is null ? "amber" : GetDnsAccent(bestDns.Recommendation))
+            };
+        }
+
+        return new[]
+        {
+            ("Quick Test Result", FormatNetworkDiagnosticsSummary(report), "Live", GetNetworkAccent(report.SpeedResult.QualityLevel)),
+            ("Best Latency Target", bestLatency is null ? "No usable ping result." : $"{bestLatency.Name} · {bestLatency.AverageLatencyMs:0.0} ms · jitter {bestLatency.JitterMs:0.0} ms · failure {bestLatency.FailureRatePercent:0.0}%", "Ping", bestLatency is null ? "red" : GetNetworkAccent(bestLatency.QualityLevel)),
+            ("360 DNS Benchmark", dns360 is null ? "360 DNS has no valid benchmark result yet." : $"{dns360.Resolver.Name} · lookup {dns360.AverageLatencyMs:0.0} ms · jitter {dns360.JitterMs:0.0} ms · failure {dns360.FailureRatePercent:0.0}%", "DNS", dns360 is null ? "amber" : GetDnsAccent(dns360.Recommendation)),
+            ("Best DNS Candidate", bestDns is null ? "No DNS recommendation yet; do not switch." : $"{bestDns.Resolver.Name} · recommendation {bestDns.Recommendation}. Real switching still requires backup and confirmation.", "Recommend", bestDns is null ? "amber" : GetDnsAccent(bestDns.Recommendation))
+        };
+    }
+
+    private (string Title, string Body, string Badge, string Accent)[] GetDnsDiagnosticRows(NetworkDiagnosticsReport report)
+    {
+        var results = report.DnsBenchmarkResults
+            .OrderBy(result => result.FailureRatePercent)
+            .ThenBy(result => result.AverageLatencyMs <= 0 ? double.MaxValue : result.AverageLatencyMs)
+            .ToArray();
+
+        if (results.Length == 0)
+        {
+            return IsZh
+                ? [("DNS 基准测试", "尚未获得 DNS 基准结果。请先进入网络测速页面执行轻量测试。", "待测试", "amber")]
+                : [("DNS Benchmark", "No DNS benchmark result yet. Run a quick test from Network Speed Test first.", "Pending", "amber")];
+        }
+
+        return results
+            .Select(result => (
+                Title: result.Resolver.Name,
+                Body: IsZh
+                    ? $"解析 {result.AverageLatencyMs:0.0} ms，抖动 {result.JitterMs:0.0} ms，失败率 {result.FailureRatePercent:0.0}%。真实切换仍处于禁用状态。"
+                    : $"Lookup {result.AverageLatencyMs:0.0} ms, jitter {result.JitterMs:0.0} ms, failure {result.FailureRatePercent:0.0}%. Real switching remains disabled.",
+                Badge: IsZh ? TranslateDnsRecommendation(result.Recommendation) : result.Recommendation.ToString(),
+                Accent: GetDnsAccent(result.Recommendation)))
+            .Take(4)
+            .ToArray();
+    }
+
+    private string FormatNetworkDiagnosticsSummary(NetworkDiagnosticsReport report)
+    {
+        if (!IsZh)
+        {
+            return $"{report.Summary} Method: {report.SpeedResult.Method}. Bandwidth consumed: {(report.ConsumedBandwidth ? "yes" : "no")}.";
+        }
+
+        var bestLatency = report.LatencyResults
+            .Where(result => result.FailureRatePercent < 100)
+            .OrderBy(result => result.AverageLatencyMs)
+            .FirstOrDefault();
+        var bestDns = report.DnsBenchmarkResults
+            .Where(result => result.FailureRatePercent < 100)
+            .OrderBy(result => result.AverageLatencyMs)
+            .FirstOrDefault();
+
+        return $"最佳延迟：{bestLatency?.Name ?? "暂无"} {bestLatency?.AverageLatencyMs:0.0} ms；最佳 DNS：{bestDns?.Resolver.Name ?? "暂无"} {bestDns?.AverageLatencyMs:0.0} ms；未进行下载/上传测速。";
+    }
+
+    private string TranslateDnsRecommendation(DnsRecommendationLevel recommendation)
+    {
+        if (!IsZh)
+        {
+            return recommendation.ToString();
+        }
+
+        return recommendation switch
+        {
+            DnsRecommendationLevel.Recommended => "推荐",
+            DnsRecommendationLevel.Candidate => "候选",
+            DnsRecommendationLevel.Avoid => "避免",
+            _ => "未知"
+        };
+    }
+
+    private static string GetNetworkAccent(NetworkQualityLevel qualityLevel)
+    {
+        return qualityLevel switch
+        {
+            NetworkQualityLevel.Good => "green",
+            NetworkQualityLevel.Watch => "amber",
+            NetworkQualityLevel.Poor => "red",
+            _ => "blue"
+        };
+    }
+
+    private static string GetDnsAccent(DnsRecommendationLevel recommendation)
+    {
+        return recommendation switch
+        {
+            DnsRecommendationLevel.Recommended => "green",
+            DnsRecommendationLevel.Avoid => "red",
+            DnsRecommendationLevel.Candidate => "blue",
+            _ => "amber"
         };
     }
 

@@ -71,6 +71,7 @@ Current prototype scope:
 - Verified 360 Secure DNS provider registry entry.
 - Competitive upgrade roadmap covering Network Intelligence, Game Session Intelligence, low-overhead monitoring, safe rule dry-runs, reversible optimization execution, Game Boost Mode, and toolkit modules.
 - Windows-first implementation strategy with macOS kept as the current development and validation environment.
+- User-triggered quick Network Speed Test with Ping/Jitter and DNS benchmark results.
 
 No optimization is executed in this prototype.
 
@@ -97,6 +98,7 @@ Core documents:
 - `docs/PHASE-03-1-MACOS-TEST-REPORT.md`
 - `docs/PHASE-03-2-ANALYSIS-REPORT.md`
 - `docs/PHASE-03-3-COMPETITIVE-ROADMAP-REPORT.md`
+- `docs/PHASE-03-4-NETWORK-INTELLIGENCE-REPORT.md`
 
 ## Repository Governance
 

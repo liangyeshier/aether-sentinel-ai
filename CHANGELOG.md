@@ -4,6 +4,23 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.8] - Phase 03.4 Network Intelligence Activation
+
+### Added
+
+- Quick Network Speed Test execution from the Network Speed Test module.
+- Local network diagnostics provider.
+- Ping/Jitter latency measurement.
+- DNS UDP lookup benchmark measurement.
+- 360 Secure DNS benchmark path.
+- Live network diagnostics result cards.
+- Phase 03.4 completion report.
+
+### Changed
+
+- Network Speed Test now has a visible action button.
+- DNS Optimization can display benchmark results after a quick network test.
+
 ## [0.3.7] - Windows-first Upgrade Roadmap
 
 ### Added

@@ -108,15 +108,28 @@ Platform decision:
 
 ## Phase 03.4 - Network Intelligence Activation
 
-Status: Planned
+Status: Completed
 
 Scope:
 
 - Activate Network Speed Test as a user-triggered module.
-- Detect China mainland ISP and region with confidence levels.
-- Support latency-only checks and explicit full speed tests.
+- Support latency-only checks.
 - Benchmark current DNS, 360 Secure DNS, and verified DNS providers.
 - Recommend DNS only from measured latency, jitter, failure rate, region, ISP, and user intent.
+
+Current deliverables:
+
+- Quick Network Speed Test button.
+- Ping/Jitter measurement.
+- DNS UDP lookup benchmark.
+- 360 Secure DNS benchmark path.
+- Live Network Speed Test result cards.
+- Full bandwidth tests remain disabled.
+
+Remaining:
+
+- China mainland ISP and region lookup with confidence levels.
+- Explicit full speed tests.
 
 ## Phase 03.5 - Game Session Intelligence
 
