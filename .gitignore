@@ -6,6 +6,7 @@ obj/
 out/
 dist/
 publish/
+artifacts/
 
 # IDE and editor files
 .vscode/

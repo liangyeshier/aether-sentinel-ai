@@ -145,7 +145,7 @@
           <Button x:Name="ZhButton" Classes="lang active" Content="简" Click="OnChineseClicked" />
           <Button x:Name="EnButton" Classes="lang" Content="EN" Click="OnEnglishClicked" />
           <Button x:Name="ScanButton" Classes="secondary" Content="Scan" Click="OnScanClicked" />
-          <Button x:Name="OptimizeButton" Classes="primary" Content="AI Optimize" />
+          <Button x:Name="OptimizeButton" Classes="primary" Content="AI Optimize" Click="OnAiOptimizeClicked" />
         </StackPanel>
       </Grid>
 
@@ -213,8 +213,8 @@
             </Grid>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="18,2,18,0">
-              <Button x:Name="AnalyzeButton" Classes="primary coreAction" Content="Analyze Now" />
-              <Button x:Name="ReportButton" Grid.Column="1" Classes="secondary coreAction" Content="View Report" />
+              <Button x:Name="AnalyzeButton" Classes="primary coreAction" Content="Analyze Now" Click="OnAnalyzeClicked" />
+              <Button x:Name="ReportButton" Grid.Column="1" Classes="secondary coreAction" Content="View Report" Click="OnViewReportClicked" />
             </Grid>
           </StackPanel>
         </Border>

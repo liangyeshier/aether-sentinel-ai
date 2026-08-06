@@ -4,6 +4,26 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.11.0] - Phase 11 Feature Loop Completion
+
+### Added
+
+- Dashboard AI Optimize full safety loop.
+- Dashboard Analyze and View Report actions.
+- PC Intelligence action panel.
+- DNS Optimization benchmark and switch-preview action panel.
+- Toolkit Center run-checks action panel.
+- Settings local save and data-folder action panel.
+- History JSON export action.
+- Local settings file model.
+- Phase 11 completion report.
+
+### Changed
+
+- Every left navigation page now exposes at least one executable local action or result-refresh path.
+- AI Optimize now chains read-only scan, quick network diagnostics, game session analysis, Game Boost preview, optimization Dry Run, safe execution simulation, Advisor report generation, and redacted history persistence.
+- Runtime artifacts are ignored by Git.
+
 ## [0.10.0] - Phase 10 AI Advisor And History
 
 ### Added

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using AetherSentinel.Core.Advisor;
 using AetherSentinel.Core.Analysis;
 using AetherSentinel.Core.Gaming;
@@ -52,10 +54,14 @@ public partial class MainWindow : Window
     private GpuIntelligenceReport? _lastGpuReport;
     private AdvisorReport? _lastAdvisorReport;
     private TextBlock? _networkSpeedStatusText;
+    private TextBlock? _pcIntelligenceStatusText;
+    private TextBlock? _dnsStatusText;
     private TextBlock? _gameSessionStatusText;
+    private TextBlock? _toolkitStatusText;
     private TextBlock? _monitorStatusText;
     private TextBlock? _dryRunStatusText;
     private TextBlock? _advisorStatusText;
+    private TextBlock? _settingsStatusText;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -94,17 +100,7 @@ public partial class MainWindow : Window
 
         try
         {
-            _lastSnapshot = await _systemScanner.CaptureAsync(
-                new ScanRequest(
-                    IncludeProcesses: true,
-                    IncludeNetwork: true,
-                    IncludeDns: true,
-                    Budget: PerformanceBudgetPolicy.DefaultLowOverhead),
-                CancellationToken.None);
-
-            _lastReport = _performanceAnalyzer.Analyze(_lastSnapshot);
-            _lastGpuReport = _gpuIntelligenceAnalyzer.Analyze(_lastSnapshot);
-            ApplySnapshot(_lastSnapshot);
+            await RunReadOnlyScanAsync();
             NavigateTo(_currentPage);
         }
         catch (Exception exception)
@@ -117,6 +113,371 @@ public partial class MainWindow : Window
             ScanButton.IsEnabled = true;
             ScanButton.Content = IsZh ? "扫描" : "Scan";
         }
+    }
+
+    private async void OnAnalyzeClicked(object? sender, RoutedEventArgs e)
+    {
+        await RunPcIntelligenceAsync(navigateToPc: true);
+    }
+
+    private async void OnRunPcIntelligenceClicked(object? sender, RoutedEventArgs e)
+    {
+        await RunPcIntelligenceAsync(navigateToPc: true);
+    }
+
+    private async void OnAiOptimizeClicked(object? sender, RoutedEventArgs e)
+    {
+        OptimizeButton.IsEnabled = false;
+        OptimizeButton.Content = IsZh ? "分析中" : "Analyzing";
+        CurrentStateBodyTitleText.Text = IsZh ? "正在生成安全优化闭环" : "Building safe optimization loop";
+        CurrentStateBodyText.Text = IsZh
+            ? "正在依次执行扫描、网络诊断、游戏识别、Dry Run、模拟执行和 AI 顾问报告。"
+            : "Running scan, network diagnostics, game detection, Dry Run, simulation, and AI Advisor report.";
+
+        try
+        {
+            await RunReadOnlyScanAsync();
+            await RunNetworkDiagnosticsAsync();
+            RunGameSessionAnalysis();
+            GenerateGameBoostPlan();
+            GenerateDryRun();
+            SimulateExecution();
+            GenerateAdvisorReport();
+
+            CurrentStateBodyTitleText.Text = IsZh ? "AI 优化闭环完成" : "AI optimization loop complete";
+            CurrentStateBodyText.Text = IsZh
+                ? "已完成安全链路：检测、解释、推荐、Dry Run、模拟执行、报告与历史记录。真实写入仍等待 Windows 验证。"
+                : "Safe loop completed: detect, explain, recommend, Dry Run, simulate, report, and history. Real writes still wait for Windows validation.";
+            NavigateTo("optimization");
+        }
+        catch (Exception exception)
+        {
+            CurrentStateBodyTitleText.Text = IsZh ? "AI 优化闭环失败" : "AI optimization loop failed";
+            CurrentStateBodyText.Text = exception.Message;
+        }
+        finally
+        {
+            OptimizeButton.IsEnabled = true;
+            OptimizeButton.Content = IsZh ? "AI 优化" : "AI Optimize";
+        }
+    }
+
+    private void OnViewReportClicked(object? sender, RoutedEventArgs e)
+    {
+        GenerateAdvisorReport();
+        NavigateTo("advisor");
+    }
+
+    private async ValueTask RunPcIntelligenceAsync(bool navigateToPc)
+    {
+        if (_pcIntelligenceStatusText is not null)
+        {
+            _pcIntelligenceStatusText.Text = IsZh
+                ? "正在执行完整只读智能分析：系统、硬件、进程、启动项、电源计划、网络和 DNS。"
+                : "Running full read-only intelligence: OS, hardware, processes, startup items, power plan, network, and DNS.";
+        }
+
+        try
+        {
+            await RunReadOnlyScanAsync();
+            CurrentStateBodyTitleText.Text = IsZh ? "电脑智能分析完成" : "PC intelligence complete";
+            CurrentStateBodyText.Text = IsZh
+                ? $"评分 {_lastReport?.OverallScore ?? 0}/100，GPU：{_lastGpuReport?.Name ?? "Unknown"}，进程：{_lastSnapshot?.TopProcesses.Count ?? 0}。"
+                : $"Score {_lastReport?.OverallScore ?? 0}/100, GPU: {_lastGpuReport?.Name ?? "Unknown"}, processes: {_lastSnapshot?.TopProcesses.Count ?? 0}.";
+
+            if (navigateToPc)
+            {
+                NavigateTo("pc");
+            }
+        }
+        catch (Exception exception)
+        {
+            CurrentStateBodyTitleText.Text = IsZh ? "电脑智能分析失败" : "PC intelligence failed";
+            CurrentStateBodyText.Text = exception.Message;
+            if (_pcIntelligenceStatusText is not null)
+            {
+                _pcIntelligenceStatusText.Text = exception.Message;
+            }
+        }
+    }
+
+    private async ValueTask RunReadOnlyScanAsync()
+    {
+        _lastSnapshot = await _systemScanner.CaptureAsync(
+            new ScanRequest(
+                IncludeProcesses: true,
+                IncludeNetwork: true,
+                IncludeDns: true,
+                Budget: PerformanceBudgetPolicy.DefaultLowOverhead),
+            CancellationToken.None);
+
+        _lastReport = _performanceAnalyzer.Analyze(_lastSnapshot);
+        _lastGpuReport = _gpuIntelligenceAnalyzer.Analyze(_lastSnapshot);
+        ApplySnapshot(_lastSnapshot);
+    }
+
+    private async ValueTask RunNetworkDiagnosticsAsync()
+    {
+        _lastNetworkDiagnostics = await _networkDiagnosticsProvider.RunQuickDiagnosticsAsync(
+            CreateNetworkDiagnosticsRequest(),
+            CancellationToken.None);
+    }
+
+    private void RunGameSessionAnalysis()
+    {
+        if (_lastSnapshot is null)
+        {
+            return;
+        }
+
+        _lastGameSessionAnalysis = _gameSessionAnalyzer.Analyze(_lastSnapshot, _gameLibrary);
+        GameSessionBodyTitleText.Text = TranslateGameSessionState(_lastGameSessionAnalysis.State);
+        GameSessionBodyText.Text = IsZh
+            ? TranslateGameSessionExplanation(_lastGameSessionAnalysis)
+            : _lastGameSessionAnalysis.Explanation;
+    }
+
+    private void GenerateGameBoostPlan()
+    {
+        _lastGameSessionAnalysis ??= _lastSnapshot is null
+            ? null
+            : _gameSessionAnalyzer.Analyze(_lastSnapshot, _gameLibrary);
+
+        _lastGameBoostPlan = _gameBoostPlanner.CreatePlan(
+            _lastGameSessionAnalysis,
+            GameBoostMode.Balanced);
+    }
+
+    private OptimizationDryRunReport GenerateDryRun()
+    {
+        _lastDryRunReport = _optimizationDryRunEngine.Generate(
+            _lastSnapshot,
+            _lastNetworkDiagnostics,
+            _lastGameSessionAnalysis);
+        return _lastDryRunReport;
+    }
+
+    private OptimizationExecutionReport SimulateExecution()
+    {
+        _lastDryRunReport ??= _optimizationDryRunEngine.Generate(
+            _lastSnapshot,
+            _lastNetworkDiagnostics,
+            _lastGameSessionAnalysis);
+
+        _lastExecutionReport = _optimizationExecutionEngine.Execute(
+            new OptimizationExecutionRequest(
+                DryRunReport: _lastDryRunReport,
+                Mode: OptimizationExecutionMode.Simulated,
+                AllowSystemChanges: false,
+                UserConsentToken: "local-ui-simulated-consent"));
+        return _lastExecutionReport;
+    }
+
+    private AdvisorReport GenerateAdvisorReport()
+    {
+        _lastAdvisorReport = _advisorReportGenerator.Generate(
+            new AdvisorReportContext(
+                Snapshot: _lastSnapshot,
+                PerformanceReport: _lastReport,
+                NetworkReport: _lastNetworkDiagnostics,
+                GameSession: _lastGameSessionAnalysis,
+                GameBoostPlan: _lastGameBoostPlan,
+                MonitorSnapshot: _lastMonitorSnapshot,
+                GpuReport: _lastGpuReport,
+                DryRunReport: _lastDryRunReport,
+                ExecutionReport: _lastExecutionReport));
+
+        var historyRecord = new AdvisorHistoryRecord(
+            Id: _lastAdvisorReport.Id,
+            CreatedAt: _lastAdvisorReport.GeneratedAt,
+            Summary: _lastAdvisorReport.Summary,
+            FindingCount: _lastAdvisorReport.Findings.Count,
+            RecommendationCount: _lastAdvisorReport.Recommendations.Count,
+            PrivacyRedactionApplied: _lastAdvisorReport.PrivacyRedactionApplied);
+        _advisorHistory.Insert(0, historyRecord);
+        SaveAdvisorHistory(_advisorHistory.Take(50).ToArray());
+        return _lastAdvisorReport;
+    }
+
+    private async void OnDnsBenchmarkClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.IsEnabled = false;
+            button.Content = IsZh ? "测试中" : "Testing";
+        }
+
+        if (_dnsStatusText is not null)
+        {
+            _dnsStatusText.Text = IsZh
+                ? "正在测试 360 安全 DNS、AliDNS 与 DNSPod 候选，不修改本机 DNS。"
+                : "Benchmarking 360 Secure DNS, AliDNS, and DNSPod candidates without changing local DNS.";
+        }
+
+        try
+        {
+            await RunNetworkDiagnosticsAsync();
+            CurrentStateBodyTitleText.Text = IsZh ? "DNS 基准测试完成" : "DNS benchmark complete";
+            CurrentStateBodyText.Text = _lastNetworkDiagnostics is null
+                ? (IsZh ? "DNS 测试未返回结果。" : "DNS benchmark returned no result.")
+                : FormatNetworkDiagnosticsSummary(_lastNetworkDiagnostics);
+            NavigateTo("dns");
+        }
+        catch (Exception exception)
+        {
+            CurrentStateBodyTitleText.Text = IsZh ? "DNS 基准测试失败" : "DNS benchmark failed";
+            CurrentStateBodyText.Text = exception.Message;
+            if (_dnsStatusText is not null)
+            {
+                _dnsStatusText.Text = exception.Message;
+            }
+        }
+        finally
+        {
+            if (sender is Button finalButton)
+            {
+                finalButton.IsEnabled = true;
+                finalButton.Content = IsZh ? "测试 DNS" : "Benchmark DNS";
+            }
+        }
+    }
+
+    private void OnDnsPreviewSwitchClicked(object? sender, RoutedEventArgs e)
+    {
+        GenerateDryRun();
+        var bestDns = _lastNetworkDiagnostics?.DnsBenchmarkResults
+            .Where(result => result.FailureRatePercent < 100)
+            .OrderBy(result => result.AverageLatencyMs)
+            .FirstOrDefault();
+
+        CurrentStateBodyTitleText.Text = IsZh ? "DNS 切换预案已生成" : "DNS switch preview generated";
+        CurrentStateBodyText.Text = bestDns is null
+            ? (IsZh ? "还没有可用 DNS 基准结果，请先测试 DNS。" : "No usable DNS benchmark yet. Benchmark DNS first.")
+            : (IsZh
+                ? $"推荐候选：{bestDns.Resolver.Name}。真实切换仍需要 Windows 管理员权限、备份和确认。"
+                : $"Candidate: {bestDns.Resolver.Name}. Real switching still needs Windows admin permission, backup, and confirmation.");
+        NavigateTo("dns");
+    }
+
+    private async void OnToolkitRunAllClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.IsEnabled = false;
+            button.Content = IsZh ? "运行中" : "Running";
+        }
+
+        if (_toolkitStatusText is not null)
+        {
+            _toolkitStatusText.Text = IsZh
+                ? "正在运行工具中心安全检查：只读扫描、网络诊断、监控采样与 Dry Run。"
+                : "Running Toolkit safety checks: read-only scan, network diagnostics, monitor sample, and Dry Run.";
+        }
+
+        try
+        {
+            await RunReadOnlyScanAsync();
+            await RunNetworkDiagnosticsAsync();
+            _lastMonitorSnapshot = await _lowOverheadMonitor.CaptureOnceAsync(
+                new MonitorRequest(
+                    Mode: MonitorSamplingMode.Light,
+                    SampleWindow: TimeSpan.FromMilliseconds(350),
+                    TopProcessCount: 5,
+                    Budget: PerformanceBudgetPolicy.DefaultLowOverhead),
+                CancellationToken.None);
+            RunGameSessionAnalysis();
+            GenerateDryRun();
+
+            CurrentStateBodyTitleText.Text = IsZh ? "工具中心检查完成" : "Toolkit check complete";
+            CurrentStateBodyText.Text = IsZh
+                ? $"已完成 {_lastSnapshot?.Insights.Count ?? 0} 条系统洞察、{_lastNetworkDiagnostics?.DnsBenchmarkResults.Count ?? 0} 个 DNS 基准和 {_lastDryRunReport?.Previews.Count ?? 0} 条规则预演。"
+                : $"Completed {_lastSnapshot?.Insights.Count ?? 0} system insights, {_lastNetworkDiagnostics?.DnsBenchmarkResults.Count ?? 0} DNS benchmarks, and {_lastDryRunReport?.Previews.Count ?? 0} rule previews.";
+            NavigateTo("toolkit");
+        }
+        catch (Exception exception)
+        {
+            CurrentStateBodyTitleText.Text = IsZh ? "工具中心检查失败" : "Toolkit check failed";
+            CurrentStateBodyText.Text = exception.Message;
+            if (_toolkitStatusText is not null)
+            {
+                _toolkitStatusText.Text = exception.Message;
+            }
+        }
+        finally
+        {
+            if (sender is Button finalButton)
+            {
+                finalButton.IsEnabled = true;
+                finalButton.Content = IsZh ? "运行检查" : "Run Checks";
+            }
+        }
+    }
+
+    private void OnSaveSettingsClicked(object? sender, RoutedEventArgs e)
+    {
+        var settings = new LocalSettingsRecord(
+            Language: _currentLanguage,
+            PerformanceMode: "LowOverhead",
+            PrivacyMode: "LocalRedacted",
+            AllowRealSystemChanges: false,
+            AutoUpdateChannel: "Reserved",
+            SavedAt: DateTimeOffset.Now);
+        SaveLocalSettings(settings);
+
+        CurrentStateBodyTitleText.Text = IsZh ? "设置已保存" : "Settings saved";
+        CurrentStateBodyText.Text = IsZh
+            ? "已保存低占用、隐私脱敏和真实写入关闭的本地设置。"
+            : "Saved local settings for low overhead, redacted privacy, and disabled real writes.";
+        if (_settingsStatusText is not null)
+        {
+            _settingsStatusText.Text = IsZh
+                ? $"已保存：{settings.SavedAt:HH:mm:ss}。配置仅存放在本机应用数据目录。"
+                : $"Saved: {settings.SavedAt:HH:mm:ss}. Config stays in the local application data folder.";
+        }
+        NavigateTo("settings");
+    }
+
+    private void OnOpenDataFolderClicked(object? sender, RoutedEventArgs e)
+    {
+        var folder = GetAppDataFolder();
+        Directory.CreateDirectory(folder);
+
+        try
+        {
+            if (OperatingSystem.IsMacOS())
+            {
+                Process.Start("open", folder);
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", folder) { UseShellExecute = true });
+            }
+            else
+            {
+                Process.Start("xdg-open", folder);
+            }
+
+            CurrentStateBodyTitleText.Text = IsZh ? "已打开数据目录" : "Data folder opened";
+            CurrentStateBodyText.Text = folder;
+        }
+        catch (Exception exception)
+        {
+            CurrentStateBodyTitleText.Text = IsZh ? "打开数据目录失败" : "Open data folder failed";
+            CurrentStateBodyText.Text = exception.Message;
+        }
+    }
+
+    private void OnExportHistoryClicked(object? sender, RoutedEventArgs e)
+    {
+        var folder = GetAppDataFolder();
+        Directory.CreateDirectory(folder);
+        var path = Path.Combine(folder, $"phase11-history-export-{DateTimeOffset.Now:yyyyMMdd-HHmmss}.json");
+        var json = JsonSerializer.Serialize(_advisorHistory, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(path, json);
+
+        CurrentStateBodyTitleText.Text = IsZh ? "历史记录已导出" : "History exported";
+        CurrentStateBodyText.Text = path;
+        NavigateTo("history");
     }
 
     private async void OnNetworkSpeedTestClicked(object? sender, RoutedEventArgs e)
@@ -288,63 +649,27 @@ public partial class MainWindow : Window
 
     private void OnGenerateDryRunClicked(object? sender, RoutedEventArgs e)
     {
-        _lastDryRunReport = _optimizationDryRunEngine.Generate(
-            _lastSnapshot,
-            _lastNetworkDiagnostics,
-            _lastGameSessionAnalysis);
-
+        var report = GenerateDryRun();
         CurrentStateBodyTitleText.Text = IsZh ? "Dry Run 已生成" : "Dry Run generated";
-        CurrentStateBodyText.Text = FormatDryRunSummary(_lastDryRunReport);
+        CurrentStateBodyText.Text = FormatDryRunSummary(report);
         NavigateTo("optimization");
     }
 
     private void OnSimulateExecutionClicked(object? sender, RoutedEventArgs e)
     {
-        _lastDryRunReport ??= _optimizationDryRunEngine.Generate(
-            _lastSnapshot,
-            _lastNetworkDiagnostics,
-            _lastGameSessionAnalysis);
-
-        _lastExecutionReport = _optimizationExecutionEngine.Execute(
-            new OptimizationExecutionRequest(
-                DryRunReport: _lastDryRunReport,
-                Mode: OptimizationExecutionMode.Simulated,
-                AllowSystemChanges: false,
-                UserConsentToken: "local-ui-simulated-consent"));
-
+        var report = SimulateExecution();
         CurrentStateBodyTitleText.Text = IsZh ? "安全执行模拟完成" : "Safe execution simulation complete";
-        CurrentStateBodyText.Text = FormatExecutionSummary(_lastExecutionReport);
+        CurrentStateBodyText.Text = FormatExecutionSummary(report);
         NavigateTo("optimization");
     }
 
     private void OnGenerateAdvisorReportClicked(object? sender, RoutedEventArgs e)
     {
-        _lastAdvisorReport = _advisorReportGenerator.Generate(
-            new AdvisorReportContext(
-                Snapshot: _lastSnapshot,
-                PerformanceReport: _lastReport,
-                NetworkReport: _lastNetworkDiagnostics,
-                GameSession: _lastGameSessionAnalysis,
-                GameBoostPlan: _lastGameBoostPlan,
-                MonitorSnapshot: _lastMonitorSnapshot,
-                GpuReport: _lastGpuReport,
-                DryRunReport: _lastDryRunReport,
-                ExecutionReport: _lastExecutionReport));
-
-        var historyRecord = new AdvisorHistoryRecord(
-            Id: _lastAdvisorReport.Id,
-            CreatedAt: _lastAdvisorReport.GeneratedAt,
-            Summary: _lastAdvisorReport.Summary,
-            FindingCount: _lastAdvisorReport.Findings.Count,
-            RecommendationCount: _lastAdvisorReport.Recommendations.Count,
-            PrivacyRedactionApplied: _lastAdvisorReport.PrivacyRedactionApplied);
-        _advisorHistory.Insert(0, historyRecord);
-        SaveAdvisorHistory(_advisorHistory.Take(50).ToArray());
-
+        var report = GenerateAdvisorReport();
         CurrentStateBodyTitleText.Text = IsZh ? "AI 顾问报告已生成" : "AI Advisor report generated";
         CurrentStateBodyText.Text = IsZh
-            ? $"生成 {_lastAdvisorReport.Findings.Count} 条发现和 {_lastAdvisorReport.Recommendations.Count} 条建议，已保存历史摘要。"
-            : $"Generated {_lastAdvisorReport.Findings.Count} findings and {_lastAdvisorReport.Recommendations.Count} recommendations; history summary saved.";
+            ? $"生成 {report.Findings.Count} 条发现和 {report.Recommendations.Count} 条建议，已保存历史摘要。"
+            : $"Generated {report.Findings.Count} findings and {report.Recommendations.Count} recommendations; history summary saved.";
         NavigateTo("advisor");
     }
 
@@ -674,7 +999,7 @@ public partial class MainWindow : Window
             grid.Children.Add(card);
         }
 
-        if (page is "speed" or "game" or "monitor" or "optimization" or "advisor" or "history")
+        if (page is "pc" or "speed" or "game" or "monitor" or "optimization" or "toolkit" or "dns" or "advisor" or "history" or "settings")
         {
             return new ScrollViewer
             {
@@ -686,12 +1011,16 @@ public partial class MainWindow : Window
                     {
                         page switch
                         {
+                            "pc" => CreatePcIntelligenceActionPanel(),
                             "speed" => CreateNetworkSpeedActionPanel(),
                             "game" => CreateGameSessionActionPanel(),
                             "monitor" => CreateMonitorActionPanel(),
                             "optimization" => CreateDryRunActionPanel(),
+                            "toolkit" => CreateToolkitActionPanel(),
+                            "dns" => CreateDnsActionPanel(),
                             "advisor" => CreateAdvisorActionPanel(),
-                            _ => CreateHistoryActionPanel()
+                            "history" => CreateHistoryActionPanel(),
+                            _ => CreateSettingsActionPanel()
                         },
                         grid
                     }
@@ -1108,6 +1437,149 @@ public partial class MainWindow : Window
             DnsLookupDomain: "www.qq.com");
     }
 
+    private Control CreatePcIntelligenceActionPanel()
+    {
+        _pcIntelligenceStatusText = new TextBlock
+        {
+            Text = _lastSnapshot is null
+                ? (IsZh
+                    ? "点击运行智能分析：采集系统、硬件、进程、启动项、电源计划、网络接口和 DNS。"
+                    : "Run intelligence: collect OS, hardware, processes, startup items, power plan, network interfaces, and DNS.")
+                : (IsZh
+                    ? $"最近扫描：{_lastSnapshot.CapturedAt:HH:mm:ss}，评分 {_lastReport?.OverallScore ?? 0}/100。"
+                    : $"Last scan: {_lastSnapshot.CapturedAt:HH:mm:ss}, score {_lastReport?.OverallScore ?? 0}/100."),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var scanButton = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "运行分析" : "Run Analysis",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        scanButton.Click += OnRunPcIntelligenceClicked;
+
+        var reportButton = new Button
+        {
+            Classes = { "secondary" },
+            Content = IsZh ? "生成报告" : "Report",
+            MinWidth = 104,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        reportButton.Click += OnViewReportClicked;
+
+        var buttons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Children = { scanButton, reportButton }
+        };
+
+        return CreateActionPanel(IsZh ? "电脑智能分析控制" : "PC Intelligence Control", _pcIntelligenceStatusText, buttons);
+    }
+
+    private Control CreateDnsActionPanel()
+    {
+        var bestDns = _lastNetworkDiagnostics?.DnsBenchmarkResults
+            .Where(result => result.FailureRatePercent < 100)
+            .OrderBy(result => result.AverageLatencyMs)
+            .FirstOrDefault();
+
+        _dnsStatusText = new TextBlock
+        {
+            Text = bestDns is null
+                ? (IsZh
+                    ? "点击测试 DNS：对 360 安全 DNS、AliDNS、DNSPod 做多轮解析基准测试，不修改系统 DNS。"
+                    : "Benchmark DNS: test 360 Secure DNS, AliDNS, and DNSPod across repeated lookups without changing system DNS.")
+                : (IsZh
+                    ? $"当前最佳候选：{bestDns.Resolver.Name}，{bestDns.AverageLatencyMs:0.0} ms。真实切换仍处于安全关闭。"
+                    : $"Best candidate: {bestDns.Resolver.Name}, {bestDns.AverageLatencyMs:0.0} ms. Real switching remains safety-disabled."),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var benchmarkButton = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "测试 DNS" : "Benchmark DNS",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        benchmarkButton.Click += OnDnsBenchmarkClicked;
+
+        var previewButton = new Button
+        {
+            Classes = { "secondary" },
+            Content = IsZh ? "切换预演" : "Switch Preview",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        previewButton.Click += OnDnsPreviewSwitchClicked;
+
+        var buttons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Children = { benchmarkButton, previewButton }
+        };
+
+        return CreateActionPanel(IsZh ? "DNS 优化控制" : "DNS Optimization Control", _dnsStatusText, buttons);
+    }
+
+    private Control CreateToolkitActionPanel()
+    {
+        _toolkitStatusText = new TextBlock
+        {
+            Text = IsZh
+                ? "点击运行检查：串联只读扫描、网络诊断、性能采样、游戏识别和优化 Dry Run。"
+                : "Run checks: chain read-only scan, network diagnostics, performance sample, game detection, and optimization Dry Run.",
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var runButton = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "运行检查" : "Run Checks",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        runButton.Click += OnToolkitRunAllClicked;
+
+        var dryRunButton = new Button
+        {
+            Classes = { "secondary" },
+            Content = IsZh ? "查看 Dry Run" : "View Dry Run",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        dryRunButton.Click += (_, _) =>
+        {
+            GenerateDryRun();
+            NavigateTo("optimization");
+        };
+
+        var buttons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Children = { runButton, dryRunButton }
+        };
+
+        return CreateActionPanel(IsZh ? "工具中心控制" : "Toolkit Control", _toolkitStatusText, buttons);
+    }
+
     private Control CreateNetworkSpeedActionPanel()
     {
         _networkSpeedStatusText = new TextBlock
@@ -1423,13 +1895,78 @@ public partial class MainWindow : Window
             VerticalContentAlignment = VerticalAlignment.Center
         };
         button.Click += (_, _) => NavigateTo("history");
-        Grid.SetColumn(button, 1);
 
-        return CreateActionPanel(IsZh ? "历史记录控制" : "History Control", status, button);
+        var exportButton = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "导出" : "Export",
+            MinWidth = 92,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        exportButton.Click += OnExportHistoryClicked;
+
+        var buttons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Children = { button, exportButton }
+        };
+
+        return CreateActionPanel(IsZh ? "历史记录控制" : "History Control", status, buttons);
+    }
+
+    private Control CreateSettingsActionPanel()
+    {
+        var currentSettings = LoadLocalSettings();
+        _settingsStatusText = new TextBlock
+        {
+            Text = currentSettings is null
+                ? (IsZh
+                    ? "当前使用默认配置：简体中文、低占用、隐私脱敏、真实系统写入关闭。"
+                    : "Using defaults: Simplified Chinese, low overhead, privacy redaction, real system writes disabled.")
+                : (IsZh
+                    ? $"已加载本地配置：{currentSettings.PerformanceMode} / {currentSettings.PrivacyMode} / 写入开启：{(currentSettings.AllowRealSystemChanges ? "是" : "否")}。"
+                    : $"Loaded local settings: {currentSettings.PerformanceMode} / {currentSettings.PrivacyMode} / writes enabled: {currentSettings.AllowRealSystemChanges}."),
+            FontSize = 13,
+            Foreground = new SolidColorBrush(Color.Parse("#A8B3C2")),
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var saveButton = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "保存设置" : "Save",
+            MinWidth = 104,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        saveButton.Click += OnSaveSettingsClicked;
+
+        var folderButton = new Button
+        {
+            Classes = { "secondary" },
+            Content = IsZh ? "数据目录" : "Data Folder",
+            MinWidth = 104,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        folderButton.Click += OnOpenDataFolderClicked;
+
+        var buttons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Children = { saveButton, folderButton }
+        };
+
+        return CreateActionPanel(IsZh ? "设置控制" : "Settings Control", _settingsStatusText, buttons);
     }
 
     private Border CreateActionPanel(string title, TextBlock status, Control action)
     {
+        Grid.SetColumn(action, 1);
+
         return new Border
         {
             Classes = { "card" },
@@ -2137,8 +2674,7 @@ public partial class MainWindow : Window
 
     private static string GetGameLibraryPath()
     {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "AETHER AGENTIC Studio", "AETHER SENTINEL AI", "game-library.json");
+        return Path.Combine(GetAppDataFolder(), "game-library.json");
     }
 
     private static IReadOnlyList<AdvisorHistoryRecord> LoadAdvisorHistory()
@@ -2170,8 +2706,45 @@ public partial class MainWindow : Window
 
     private static string GetAdvisorHistoryPath()
     {
+        return Path.Combine(GetAppDataFolder(), "advisor-history.json");
+    }
+
+    private static LocalSettingsRecord? LoadLocalSettings()
+    {
+        try
+        {
+            var path = GetLocalSettingsPath();
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            var json = File.ReadAllText(path);
+            return JsonSerializer.Deserialize<LocalSettingsRecord>(json);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static void SaveLocalSettings(LocalSettingsRecord settings)
+    {
+        var path = GetLocalSettingsPath();
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(path, json);
+    }
+
+    private static string GetLocalSettingsPath()
+    {
+        return Path.Combine(GetAppDataFolder(), "settings.json");
+    }
+
+    private static string GetAppDataFolder()
+    {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "AETHER AGENTIC Studio", "AETHER SENTINEL AI", "advisor-history.json");
+        return Path.Combine(appData, "AETHER AGENTIC Studio", "AETHER SENTINEL AI");
     }
 
     private Border CreateModuleCard(string title, string body, string badge, string accent)
@@ -2241,4 +2814,12 @@ public partial class MainWindow : Window
         Grid.SetColumn(badge, 1);
         return badge;
     }
+
+    private sealed record LocalSettingsRecord(
+        string Language,
+        string PerformanceMode,
+        string PrivacyMode,
+        bool AllowRealSystemChanges,
+        string AutoUpdateChannel,
+        DateTimeOffset SavedAt);
 }
