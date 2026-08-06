@@ -84,6 +84,45 @@ Remaining:
 - Real ISP and region lookup provider.
 - User-approved speed test execution.
 
+## Phase 03.3 - Competitive Feature Synthesis
+
+Status: Completed
+
+Scope:
+
+- Review public BoosterX behavior as a commercial reference.
+- Review Pavise as a public-source Windows game performance reference with a custom non-sale license.
+- Review LaoYing Toolkit as an unverified public-reference feature direction until official source and license are confirmed.
+- Define the combined AETHER feature upgrade roadmap.
+- Preserve independent implementation and license safety boundaries.
+
+Deliverable:
+
+- `docs/COMPETITIVE_FEATURE_ROADMAP.md`
+
+## Phase 03.4 - Network Intelligence Activation
+
+Status: Planned
+
+Scope:
+
+- Activate Network Speed Test as a user-triggered module.
+- Detect China mainland ISP and region with confidence levels.
+- Support latency-only checks and explicit full speed tests.
+- Benchmark current DNS, 360 Secure DNS, and verified DNS providers.
+- Recommend DNS only from measured latency, jitter, failure rate, region, ISP, and user intent.
+
+## Phase 03.5 - Game Session Intelligence
+
+Status: Planned
+
+Scope:
+
+- Add user-managed game library.
+- Detect game sessions, foreground state, launchers, updaters, crash reporters, and anti-cheat roles.
+- Produce read-only session intelligence before any optimization execution.
+- Keep no-injection, no-memory-modification, and no-game-file-modification boundaries.
+
 ## Phase 04 - Low-overhead Performance Monitoring
 
 Status: Planned
@@ -94,6 +133,7 @@ Scope:
 - Prefer native APIs and lightweight timers over always-on polling.
 - Reduce or pause sampling while the app is hidden, idle, or during game sessions.
 - Expose performance cost inside Settings so users can understand overhead.
+- Explain top CPU, memory, disk, network, and background pressure sources.
 
 ## Phase 05 - Optimization Rule Engine Dry Run
 
@@ -105,6 +145,56 @@ Scope:
 - Support dry-run previews before any real change.
 - Require risk level, backup method, verification signal, and rollback method for every rule.
 - Keep all execution disabled until rules pass validation.
+
+## Phase 06 - Safe Optimization Execution
+
+Status: Planned
+
+Scope:
+
+- Enable only low-risk, reversible optimization rules.
+- Start with DNS apply, startup item restore, temporary cleanup, power profile changes, notification review, and privacy telemetry review.
+- Require backup, user confirmation, verification, and rollback for every write action.
+
+## Phase 07 - Game Boost Mode
+
+Status: Planned
+
+Scope:
+
+- Add game-session-level resource protection.
+- Use no-injection process and system policy boundaries.
+- Support protected process lists, user whitelists, anti-cheat safety boundaries, and session restore.
+- Generate before/after session reports.
+
+## Phase 08 - Toolkit Layer
+
+Status: Planned
+
+Scope:
+
+- Add practical utility modules for startup, services, power plans, DNS, network, storage cleanup, memory pressure, GPU inspection, and restore center.
+- Keep tools grouped, reversible, and explanation-first.
+
+## Phase 09 - AI Advisor And History
+
+Status: Planned
+
+Scope:
+
+- Generate natural-language performance explanations.
+- Compare historical scores and session results.
+- Export local reports with private data redaction.
+
+## Phase 10 - Release And Update Infrastructure
+
+Status: Planned
+
+Scope:
+
+- Prepare GitHub Actions build and release packaging.
+- Reserve update manifest, package verification, and rollback-aware UpdateManager.
+- Keep private endpoints, signing credentials, and production secrets outside the open repository.
 
 ## Future Product Expansion
 

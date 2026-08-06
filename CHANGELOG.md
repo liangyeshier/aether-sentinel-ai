@@ -4,6 +4,19 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.6] - Competitive Feature Roadmap
+
+### Added
+
+- Competitive feature roadmap combining BoosterX, Pavise, and LaoYing-style utility directions.
+- License and reuse boundaries for public-source and public-reference products.
+- Phase 03.4 through Phase 10 upgrade plan for network intelligence, game session intelligence, monitoring, dry-run rules, safe execution, game boost mode, toolkit modules, AI history, and update infrastructure.
+- Roadmap alignment matrices for BoosterX, Pavise, and LaoYing-style capabilities.
+
+### Changed
+
+- README and main roadmap now reference the competitive synthesis roadmap.
+
 ## [0.3.5] - Phase 03.2 Read-only Performance Scoring
 
 ### Added
