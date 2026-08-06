@@ -7,14 +7,17 @@
     Height="760"
     MinWidth="1040"
     MinHeight="680"
-    Background="#05070A"
+    Background="#04070B"
     FontFamily="Inter, PingFang SC, Microsoft YaHei, Segoe UI, SF Pro">
   <Window.Resources>
-    <SolidColorBrush x:Key="DeepSpaceBrush" Color="#05070A" />
-    <SolidColorBrush x:Key="AetherDarkBrush" Color="#0B0F14" />
-    <SolidColorBrush x:Key="SurfaceBrush" Color="#101722" />
-    <SolidColorBrush x:Key="SurfaceSoftBrush" Color="#121B28" />
-    <SolidColorBrush x:Key="BorderBrush" Color="#1C2531" />
+    <SolidColorBrush x:Key="DeepSpaceBrush" Color="#04070B" />
+    <SolidColorBrush x:Key="AetherDarkBrush" Color="#B0060B10" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#CC101722" />
+    <SolidColorBrush x:Key="SurfaceSoftBrush" Color="#A6121B28" />
+    <SolidColorBrush x:Key="GlassInsetBrush" Color="#850A111B" />
+    <SolidColorBrush x:Key="BorderBrush" Color="#2A3342" />
+    <SolidColorBrush x:Key="GlassBorderBrush" Color="#4A6682A4" />
+    <SolidColorBrush x:Key="GlassHighlightBrush" Color="#2DFFFFFF" />
     <SolidColorBrush x:Key="BlueBrush" Color="#2F80FF" />
     <SolidColorBrush x:Key="GreenBrush" Color="#2BD576" />
     <SolidColorBrush x:Key="AmberBrush" Color="#F2B84B" />
@@ -22,6 +25,29 @@
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F4F7FB" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A8B3C2" />
     <SolidColorBrush x:Key="TextMutedBrush" Color="#6F7A89" />
+    <LinearGradientBrush x:Key="WindowBackdropBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Color="#05080D" Offset="0" />
+      <GradientStop Color="#071018" Offset="0.52" />
+      <GradientStop Color="#05070B" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="GlassSurfaceBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Color="#D0121A26" Offset="0" />
+      <GradientStop Color="#AB0C131D" Offset="0.58" />
+      <GradientStop Color="#C5071018" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="GlassSurfaceStrongBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Color="#E0152030" Offset="0" />
+      <GradientStop Color="#C20E1723" Offset="0.56" />
+      <GradientStop Color="#D0071018" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="PrimaryButtonBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Color="#3490FF" Offset="0" />
+      <GradientStop Color="#1676E8" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="SecondaryButtonBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Color="#A21A293B" Offset="0" />
+      <GradientStop Color="#85101A27" Offset="1" />
+    </LinearGradientBrush>
   </Window.Resources>
 
   <Window.Styles>
@@ -29,10 +55,11 @@
       <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Border.card">
-      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="Background" Value="{StaticResource GlassSurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BoxShadow" Value="0 14 32 0 #26000000" />
     </Style>
     <Style Selector="Button.navButton">
       <Setter Property="Background" Value="Transparent" />
@@ -47,25 +74,27 @@
       <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.navButton.active">
-      <Setter Property="Background" Value="#18283C" />
-      <Setter Property="BorderBrush" Value="#294767" />
+      <Setter Property="Background" Value="#A61B3149" />
+      <Setter Property="BorderBrush" Value="#4B82B8E8" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="Button.primary">
-      <Setter Property="Background" Value="{StaticResource BlueBrush}" />
+      <Setter Property="Background" Value="{StaticResource PrimaryButtonBrush}" />
       <Setter Property="Foreground" Value="White" />
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="Padding" Value="18,11" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="HorizontalContentAlignment" Value="Center" />
       <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="BorderBrush" Value="#63B6E7FF" />
+      <Setter Property="BorderThickness" Value="1" />
     </Style>
     <Style Selector="Button.secondary">
-      <Setter Property="Background" Value="#162231" />
+      <Setter Property="Background" Value="{StaticResource SecondaryButtonBrush}" />
       <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="Padding" Value="14,10" />
@@ -73,9 +102,9 @@
       <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.lang">
-      <Setter Property="Background" Value="#101722" />
+      <Setter Property="Background" Value="#88101722" />
       <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="Padding" Value="11,10" />
@@ -84,7 +113,7 @@
       <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.lang.active">
-      <Setter Property="Background" Value="#18283C" />
+      <Setter Property="Background" Value="#A61B3149" />
       <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
       <Setter Property="BorderBrush" Value="#2F80FF" />
     </Style>
@@ -98,8 +127,8 @@
     </Style>
   </Window.Styles>
 
-  <Grid ColumnDefinitions="228,*,306" Background="{StaticResource DeepSpaceBrush}">
-    <Border Grid.Column="0" Background="{StaticResource AetherDarkBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="20,22">
+  <Grid ColumnDefinitions="228,*,306" Background="{StaticResource WindowBackdropBrush}">
+    <Border Grid.Column="0" Background="{StaticResource AetherDarkBrush}" BorderBrush="{StaticResource GlassBorderBrush}" BorderThickness="0,0,1,0" Padding="20,22">
       <Grid RowDefinitions="Auto,*,Auto">
         <StackPanel Spacing="4">
           <TextBlock Text="AETHER" FontSize="21" FontWeight="Bold" LetterSpacing="0" />
@@ -222,19 +251,19 @@
         <Border Grid.Column="1" Classes="card" Padding="20">
           <StackPanel Spacing="15">
             <TextBlock x:Name="QueueTitleText" Text="Optimization Queue" FontSize="18" FontWeight="SemiBold" />
-            <Border Background="#0B141F" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
+            <Border Background="{StaticResource GlassInsetBrush}" BorderBrush="{StaticResource GlassBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
               <StackPanel Spacing="5">
                 <TextBlock x:Name="QueueItemOneTitleText" Text="Reduce startup pressure" FontWeight="SemiBold" />
                 <TextBlock x:Name="QueueItemOneBodyText" Text="3 background launch items require review." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
               </StackPanel>
             </Border>
-            <Border Background="#0B141F" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
+            <Border Background="{StaticResource GlassInsetBrush}" BorderBrush="{StaticResource GlassBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
               <StackPanel Spacing="5">
                 <TextBlock x:Name="QueueItemTwoTitleText" Text="GPU thermal watch" FontWeight="SemiBold" />
                 <TextBlock x:Name="QueueItemTwoBodyText" Text="High load detected. No automatic action will run without confirmation." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
               </StackPanel>
             </Border>
-            <Border Background="#0B141F" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
+            <Border Background="{StaticResource GlassInsetBrush}" BorderBrush="{StaticResource GlassBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
               <StackPanel Spacing="5">
                 <TextBlock x:Name="QueueItemThreeTitleText" Text="Rollback required" FontWeight="SemiBold" />
                 <TextBlock x:Name="QueueItemThreeBodyText" Text="Every optimization rule must define backup and rollback before execution." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
@@ -246,7 +275,7 @@
 
       <Border x:Name="TipsCard" Grid.Row="3" Classes="card" Padding="16" Margin="0,16,0,0">
         <Grid ColumnDefinitions="Auto,*">
-          <Border Width="42" Height="42" CornerRadius="8" Background="#16283C">
+          <Border Width="42" Height="42" CornerRadius="8" Background="{StaticResource GlassInsetBrush}" BorderBrush="{StaticResource GlassBorderBrush}" BorderThickness="1">
             <TextBlock Text="AI" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource BlueBrush}" />
           </Border>
           <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="3">
@@ -259,7 +288,7 @@
       <ContentControl x:Name="ModuleContent" Grid.Row="1" Grid.RowSpan="3" IsVisible="False" />
     </Grid>
 
-    <Border Grid.Column="2" Background="#07101A" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0" Padding="20,22">
+    <Border Grid.Column="2" Background="#B007101A" BorderBrush="{StaticResource GlassBorderBrush}" BorderThickness="1,0,0,0" Padding="20,22">
       <Grid RowDefinitions="Auto,*,Auto">
         <StackPanel>
           <TextBlock x:Name="FeedTitleText" Text="Sentinel Feed" FontSize="20" FontWeight="SemiBold" />

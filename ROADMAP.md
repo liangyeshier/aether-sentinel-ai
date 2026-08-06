@@ -2,6 +2,30 @@
 
 AETHER SENTINEL AI uses phase-based planning.
 
+## Phase 12 - AETHER Glass And YuqiEngine Review
+
+Status: Completed
+
+Scope:
+
+- Review YuqiEngine as a Windows optimization reference without copying code, assets, UI, or package contents.
+- Absorb independently implementable product patterns: status taxonomy, backup and restore, problem package generation, module grouping, and guarded persistent assistant behavior.
+- Apply the first AETHER Glass visual material pass to the Avalonia shell.
+- Preserve low-overhead rendering and Windows-first test readiness.
+
+Deliverables:
+
+- AETHER Glass dark material tokens in the desktop shell.
+- Refined glass panel, border, primary button, secondary button, and language button materials.
+- YuqiEngine independent feature absorption document.
+- Phase 12 completion report.
+
+Boundary:
+
+- YuqiEngine has not been copied into this repository.
+- AETHER keeps Avalonia native UI instead of moving to WebView2.
+- Real Windows write operations remain gated until Windows validation.
+
 ## Phase 11 - Feature Loop Completion
 
 Status: Completed

@@ -101,15 +101,37 @@ BorderSubtle: #1C2531
 SurfaceRaised: #101722
 ```
 
+AETHER Glass tokens:
+
+```text
+WindowBackdrop: #05080D -> #071018 -> #05070B
+GlassSurface: translucent #121A26 / #0C131D / #071018
+GlassSurfaceStrong: translucent #152030 / #0E1723 / #071018
+GlassInset: translucent #0A111B
+GlassBorder: #4A6682A4
+GlassHighlight: #2DFFFFFF
+PrimaryButton: #3490FF -> #1676E8
+SecondaryButton: translucent #1A293B -> #101A27
+```
+
 Usage:
 
 - Background: `DeepSpace`.
 - App shell and navigation: `AetherDark`.
 - Raised surfaces: `SurfaceRaised`.
+- AETHER Glass surfaces: use on panels and cards only when contrast remains readable.
 - Primary action: `AIEnergyBlue`.
 - Healthy state: `PerformanceGreen`.
 - Warning state: `OptimizationAmber`.
 - Error or destructive risk: `AlertRed`.
+
+Glass rules:
+
+- Glass is a material accent, not the product identity.
+- Text contrast must remain stronger than the material effect.
+- Use static layered brushes first; avoid expensive real-time blur until Windows profiling confirms the cost.
+- Provide a future low-performance fallback that returns to solid surfaces.
+- Do not use large decorative glows, orbs, bokeh, or blurred atmosphere as the main visual effect.
 
 ## Typography
 

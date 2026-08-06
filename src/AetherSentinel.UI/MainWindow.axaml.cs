@@ -751,8 +751,10 @@ public partial class MainWindow : Window
             ? "版本检查、包验证与回滚仍处于架构预留状态。"
             : "Version checking, package verification, and rollback are architecture placeholders.";
 
-        PhasePreviewTitleText.Text = zh ? "Phase 03 网络智能" : "Phase 03 Network Intelligence";
-        PhasePreviewBodyText.Text = zh ? "网络测速、DNS Provider 与只读扫描模型已进入架构层。" : "Network speed testing, DNS providers, and read-only scan models are now in the architecture layer.";
+        PhasePreviewTitleText.Text = zh ? "Phase 12 AETHER Glass" : "Phase 12 AETHER Glass";
+        PhasePreviewBodyText.Text = zh
+            ? "已加入低占用玻璃材质与 YuqiEngine 独立吸收路线，等待 Windows 真实环境验证。"
+            : "Low-overhead glass materials and YuqiEngine independent absorption planning are ready for Windows validation.";
 
         ZhButton.Classes.Set("active", zh);
         EnButton.Classes.Set("active", !zh);
@@ -2798,7 +2800,7 @@ public partial class MainWindow : Window
     {
         var badge = new Border
         {
-            Background = new SolidColorBrush(Color.Parse("#0B141F")),
+            Background = new SolidColorBrush(Color.Parse("#7A0A111B")),
             BorderBrush = accentBrush,
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8),

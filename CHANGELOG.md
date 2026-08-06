@@ -4,6 +4,19 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.12.0] - Phase 12 AETHER Glass And YuqiEngine Review
+
+### Added
+
+- AETHER Glass visual material direction for the Avalonia shell.
+- YuqiEngine independent feature absorption review.
+- Phase 12 completion report.
+
+### Changed
+
+- The main desktop shell now uses layered dark glass surfaces, refined panel borders, and gradient action materials while preserving 8 px radius and low-overhead rendering.
+- Runtime visual direction now explicitly avoids WebView-based dependency growth and keeps Windows native polish as the target.
+
 ## [0.11.0] - Phase 11 Feature Loop Completion
 
 ### Added
