@@ -1,0 +1,55 @@
+# Build outputs
+bin/
+obj/
+out/
+dist/
+publish/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.pem
+*.key
+*.crt
+secrets/
+local.settings.json
+appsettings.Local.json
+appsettings.Development.local.json
+
+# Workflow placeholders remain local until GitHub CLI has workflow scope.
+.github/workflows/*.yml
+
+# Package and release artifacts
+*.nupkg
+*.snupkg
+*.zip
+*.tar.gz
+*.msix
+*.msi
+*.exe
+*.dmg
+
+# Test and coverage artifacts
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
