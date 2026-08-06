@@ -4,6 +4,21 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.7.0] - Phase 07 Game Boost Mode
+
+### Added
+
+- Game Boost plan model.
+- Game Boost action preview model.
+- Game Boost planner.
+- Balanced Game Boost plan generation.
+- Game Optimization Boost Plan button and result cards.
+- Phase 07 completion report.
+
+### Changed
+
+- Game Optimization can now generate a safe Game Boost preview plan while keeping real execution disabled.
+
 ## [0.6.0] - Phase 06 Safe Optimization Execution
 
 ### Added

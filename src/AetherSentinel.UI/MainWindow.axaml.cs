@@ -30,6 +30,7 @@ public partial class MainWindow : Window
     private readonly IPerformanceAnalyzer _performanceAnalyzer = new PerformanceAnalyzer();
     private readonly INetworkDiagnosticsProvider _networkDiagnosticsProvider = new LocalNetworkDiagnosticsProvider();
     private readonly IGameSessionAnalyzer _gameSessionAnalyzer = new GameSessionAnalyzer();
+    private readonly IGameBoostPlanner _gameBoostPlanner = new GameBoostPlanner();
     private readonly ILowOverheadMonitor _lowOverheadMonitor = new LocalLowOverheadMonitor();
     private readonly IOptimizationDryRunEngine _optimizationDryRunEngine = new OptimizationDryRunEngine();
     private readonly IOptimizationExecutionEngine _optimizationExecutionEngine = new OptimizationExecutionEngine();
@@ -38,6 +39,7 @@ public partial class MainWindow : Window
     private PerformanceAnalysisReport? _lastReport;
     private NetworkDiagnosticsReport? _lastNetworkDiagnostics;
     private GameSessionAnalysis? _lastGameSessionAnalysis;
+    private GameBoostPlan? _lastGameBoostPlan;
     private MonitorSnapshot? _lastMonitorSnapshot;
     private OptimizationDryRunReport? _lastDryRunReport;
     private OptimizationExecutionReport? _lastExecutionReport;
@@ -208,6 +210,23 @@ public partial class MainWindow : Window
             ? TranslateGameSessionExplanation(_lastGameSessionAnalysis)
             : _lastGameSessionAnalysis.Explanation;
 
+        NavigateTo("game");
+    }
+
+    private void OnGenerateGameBoostPlanClicked(object? sender, RoutedEventArgs e)
+    {
+        _lastGameSessionAnalysis ??= _lastSnapshot is null
+            ? null
+            : _gameSessionAnalyzer.Analyze(_lastSnapshot, _gameLibrary);
+
+        _lastGameBoostPlan = _gameBoostPlanner.CreatePlan(
+            _lastGameSessionAnalysis,
+            GameBoostMode.Balanced);
+
+        CurrentStateBodyTitleText.Text = IsZh ? "Game Boost 方案已生成" : "Game Boost plan generated";
+        CurrentStateBodyText.Text = IsZh
+            ? $"生成 {_lastGameBoostPlan.Actions.Count} 项预览动作；真实执行仍禁用。"
+            : $"{_lastGameBoostPlan.Actions.Count} preview actions generated; real execution remains disabled.";
         NavigateTo("game");
     }
 
@@ -644,6 +663,11 @@ public partial class MainWindow : Window
         if (page == "speed" && _lastNetworkDiagnostics is not null)
         {
             return GetNetworkDiagnosticRows(_lastNetworkDiagnostics);
+        }
+
+        if (page == "game" && _lastGameBoostPlan is not null)
+        {
+            return GetGameBoostRows(_lastGameBoostPlan);
         }
 
         if (page == "game" && _lastGameSessionAnalysis is not null)
@@ -1110,11 +1134,21 @@ public partial class MainWindow : Window
         };
         analyzeButton.Click += OnAnalyzeGameSessionClicked;
 
+        var boostButton = new Button
+        {
+            Classes = { "primary" },
+            Content = IsZh ? "加速方案" : "Boost Plan",
+            MinWidth = 112,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        boostButton.Click += OnGenerateGameBoostPlanClicked;
+
         var buttonPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 10,
-            Children = { addButton, analyzeButton }
+            Children = { addButton, analyzeButton, boostButton }
         };
         Grid.SetColumn(buttonPanel, 1);
 
@@ -1355,6 +1389,20 @@ public partial class MainWindow : Window
         };
     }
 
+    private (string Title, string Body, string Badge, string Accent)[] GetGameBoostRows(GameBoostPlan plan)
+    {
+        return plan.Actions
+            .Take(4)
+            .Select(action => (
+                Title: IsZh ? TranslateGameBoostAction(action) : action.Name,
+                Body: IsZh
+                    ? $"{TranslateGameBoostState(action.State)}：{action.Reason} 安全：{action.SafetyNote}"
+                    : $"{action.State}: {action.Reason} Safety: {action.SafetyNote}",
+                Badge: IsZh ? TranslateGameBoostState(action.State) : action.State.ToString(),
+                Accent: GetGameBoostAccent(action.State)))
+            .ToArray();
+    }
+
     private (string Title, string Body, string Badge, string Accent)[] GetMonitorRows(MonitorSnapshot snapshot)
     {
         var top = snapshot.TopMemoryProcesses.FirstOrDefault();
@@ -1479,6 +1527,35 @@ public partial class MainWindow : Window
         };
     }
 
+    private string TranslateGameBoostAction(GameBoostActionPreview action)
+    {
+        return action.Category switch
+        {
+            GameBoostActionCategory.BackgroundPressure => "后台压力复核",
+            GameBoostActionCategory.ProcessPriority => "游戏优先级策略",
+            GameBoostActionCategory.IoPriority => "I/O 优先级策略",
+            GameBoostActionCategory.PowerPlan => "会话电源计划",
+            GameBoostActionCategory.NotificationFocus => "通知专注策略",
+            GameBoostActionCategory.Restore => "会话恢复路径",
+            _ => action.Name
+        };
+    }
+
+    private string TranslateGameBoostState(GameBoostActionState state)
+    {
+        if (!IsZh)
+        {
+            return state.ToString();
+        }
+
+        return state switch
+        {
+            GameBoostActionState.EligibleForFutureExecution => "未来可执行",
+            GameBoostActionState.Blocked => "已阻止",
+            _ => "仅预览"
+        };
+    }
+
     private string TranslateMonitorSeverity(MonitorWarningSeverity severity)
     {
         if (!IsZh)
@@ -1583,6 +1660,16 @@ public partial class MainWindow : Window
             GameSessionState.GameCandidate => "blue",
             GameSessionState.LauncherCandidate => "amber",
             GameSessionState.NeedsConfirmation => "amber",
+            _ => "blue"
+        };
+    }
+
+    private static string GetGameBoostAccent(GameBoostActionState state)
+    {
+        return state switch
+        {
+            GameBoostActionState.EligibleForFutureExecution => "green",
+            GameBoostActionState.Blocked => "red",
             _ => "blue"
         };
     }

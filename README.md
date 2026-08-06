@@ -29,7 +29,7 @@ Understand -> Analyze -> Explain -> Recommend -> Optimize -> Verify
 Current phase:
 
 ```text
-Phase 06 - Safe Optimization Execution
+Phase 07 - Game Boost Mode
 ```
 
 The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, core read-only intelligence contracts, first local read-only scanning, and a Windows-first upgrade roadmap aligned against BoosterX and Pavise. Optimization execution is still disabled.
@@ -77,6 +77,7 @@ Current prototype scope:
 - User-triggered low-overhead performance monitor sample.
 - Optimization Center Dry Run rule preview.
 - Guarded safe optimization execution simulation with restore point records.
+- Game Boost Mode preview plan generation.
 
 No optimization is executed in this prototype.
 
@@ -109,6 +110,7 @@ Core documents:
 - `docs/PHASE-04-LOW-OVERHEAD-MONITOR-REPORT.md`
 - `docs/PHASE-05-OPTIMIZATION-DRY-RUN-REPORT.md`
 - `docs/PHASE-06-SAFE-OPTIMIZATION-EXECUTION-REPORT.md`
+- `docs/PHASE-07-GAME-BOOST-MODE-REPORT.md`
 
 ## Repository Governance
 
