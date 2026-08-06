@@ -17,5 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AetherSentinel.Core\AetherSentinel.Core.csproj" />
+    <ProjectReference Include="..\AetherSentinel.Platforms\AetherSentinel.Platforms.csproj" />
   </ItemGroup>
 </Project>

@@ -93,10 +93,13 @@ Deliverables:
 - Core scanner abstractions. Completed.
 - Platform adapter boundary. Completed.
 - Structured system snapshot model. Completed.
+- `AetherSentinel.Platforms` project. Completed.
+- First local read-only scan adapter. Completed.
+- Scan button UI integration. Completed.
 - Network quality, DNS, ISP region, and speed test models. Completed.
 - Network Intelligence planning document. Completed.
 - Windows read-only adapter implementation. Planned.
-- macOS read-only adapter implementation. Planned.
+- macOS adapter expansion for GPU, startup items, and richer CPU sampling. Planned.
 - No optimization execution.
 
 ## Milestone 4: Low-overhead Performance Monitoring

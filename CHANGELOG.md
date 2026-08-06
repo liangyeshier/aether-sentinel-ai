@@ -4,6 +4,20 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.3] - Phase 03.1 Local Read-only Scan
+
+### Added
+
+- `AetherSentinel.Platforms` project for platform-specific adapters.
+- Local read-only system adapter.
+- Scan button integration with real local OS, memory, storage, process, network interface, and DNS reads.
+- Live dashboard updates after a read-only scan.
+- Live module cards for PC Intelligence, DNS Optimization, and Network Speed Test after scanning.
+
+### Changed
+
+- UI now distinguishes real read-only data from pending CPU/GPU/network speed adapters.
+
 ## [0.3.2] - Network Speed Navigation Visibility
 
 ### Changed

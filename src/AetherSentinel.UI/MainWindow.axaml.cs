@@ -1,4 +1,9 @@
 using System;
+using System.Linq;
+using System.Threading;
+using AetherSentinel.Core.Performance;
+using AetherSentinel.Core.Scanning;
+using AetherSentinel.Platforms.Scanning;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -10,6 +15,8 @@ namespace AetherSentinel.UI;
 
 public partial class MainWindow : Window
 {
+    private readonly ISystemScanner _systemScanner = new PlatformSystemScanner(new LocalPlatformSystemAdapter());
+    private SystemSnapshot? _lastSnapshot;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -34,6 +41,40 @@ public partial class MainWindow : Window
         if (sender is Button { Tag: string page })
         {
             NavigateTo(page);
+        }
+    }
+
+    private async void OnScanClicked(object? sender, RoutedEventArgs e)
+    {
+        ScanButton.IsEnabled = false;
+        ScanButton.Content = IsZh ? "扫描中" : "Scanning";
+        CurrentStateBodyTitleText.Text = IsZh ? "正在执行只读扫描" : "Running read-only scan";
+        CurrentStateBodyText.Text = IsZh
+            ? "正在读取本机系统、存储、进程、网络接口和 DNS 配置。"
+            : "Reading local OS, storage, process, network interface, and DNS configuration.";
+
+        try
+        {
+            _lastSnapshot = await _systemScanner.CaptureAsync(
+                new ScanRequest(
+                    IncludeProcesses: true,
+                    IncludeNetwork: true,
+                    IncludeDns: true,
+                    Budget: PerformanceBudgetPolicy.DefaultLowOverhead),
+                CancellationToken.None);
+
+            ApplySnapshot(_lastSnapshot);
+            NavigateTo(_currentPage);
+        }
+        catch (Exception exception)
+        {
+            CurrentStateBodyTitleText.Text = IsZh ? "扫描失败" : "Scan failed";
+            CurrentStateBodyText.Text = exception.Message;
+        }
+        finally
+        {
+            ScanButton.IsEnabled = true;
+            ScanButton.Content = IsZh ? "扫描" : "Scan";
         }
     }
 
@@ -120,7 +161,69 @@ public partial class MainWindow : Window
         ZhButton.Classes.Set("active", zh);
         EnButton.Classes.Set("active", !zh);
 
+        if (_lastSnapshot is not null)
+        {
+            ApplySnapshot(_lastSnapshot);
+        }
+
         NavigateTo(_currentPage);
+    }
+
+    private void ApplySnapshot(SystemSnapshot snapshot)
+    {
+        var memoryPercent = snapshot.Hardware.MemoryTotalMb <= 0
+            ? 0
+            : Math.Round((double)snapshot.Hardware.MemoryUsedMb / snapshot.Hardware.MemoryTotalMb * 100);
+        var primaryStorage = snapshot.Hardware.Storage.FirstOrDefault();
+        var diskPercent = primaryStorage?.ActivePercent ?? 0;
+        var topProcess = snapshot.TopProcesses.FirstOrDefault();
+        var dnsSummary = snapshot.Network.CurrentDnsServers.Count == 0
+            ? (IsZh ? "未检测到 DNS" : "DNS not detected")
+            : string.Join(", ", snapshot.Network.CurrentDnsServers.Take(2));
+
+        CpuMetricText.Text = IsZh ? "只读" : "Read";
+        CpuStatusText.Text = IsZh ? "CPU 已识别" : "CPU identified";
+        CpuStatusText.Foreground = new SolidColorBrush(Color.Parse("#A8B3C2"));
+
+        GpuMetricText.Text = IsZh ? "预留" : "Next";
+        GpuStatusText.Text = IsZh ? "GPU 适配待接入" : "GPU adapter pending";
+        GpuStatusText.Foreground = new SolidColorBrush(Color.Parse("#F2B84B"));
+
+        MemoryMetricText.Text = memoryPercent <= 0 ? "--" : $"{memoryPercent:0}%";
+        MemoryStatusText.Text = IsZh
+            ? $"{FormatMb(snapshot.Hardware.MemoryUsedMb)} / {FormatMb(snapshot.Hardware.MemoryTotalMb)}"
+            : $"{FormatMb(snapshot.Hardware.MemoryUsedMb)} / {FormatMb(snapshot.Hardware.MemoryTotalMb)}";
+        MemoryStatusText.Foreground = new SolidColorBrush(memoryPercent >= 85 ? Color.Parse("#F2B84B") : Color.Parse("#2BD576"));
+
+        DiskMetricText.Text = diskPercent <= 0 ? "--" : $"{diskPercent:0}%";
+        DiskStatusText.Text = primaryStorage is null
+            ? (IsZh ? "未检测到磁盘" : "No drive detected")
+            : $"{primaryStorage.FreeGb} GB free";
+        DiskStatusText.Foreground = new SolidColorBrush(diskPercent >= 85 ? Color.Parse("#F2B84B") : Color.Parse("#2BD576"));
+
+        LocalScanReadyText.Text = IsZh
+            ? $"已扫描 {snapshot.CapturedAt:HH:mm}"
+            : $"Scanned {snapshot.CapturedAt:HH:mm}";
+
+        CurrentStateBodyTitleText.Text = IsZh ? "只读扫描完成" : "Read-only scan complete";
+        CurrentStateBodyText.Text = IsZh
+            ? $"{snapshot.OperatingSystem.Name}，{snapshot.Network.PrimaryInterfaceName}，DNS：{dnsSummary}"
+            : $"{snapshot.OperatingSystem.Name}, {snapshot.Network.PrimaryInterfaceName}, DNS: {dnsSummary}";
+
+        QueueItemOneTitleText.Text = IsZh ? "本机系统" : "Local system";
+        QueueItemOneBodyText.Text = IsZh
+            ? $"{snapshot.OperatingSystem.DeviceName} / {snapshot.OperatingSystem.Architecture}"
+            : $"{snapshot.OperatingSystem.DeviceName} / {snapshot.OperatingSystem.Architecture}";
+        QueueItemTwoTitleText.Text = IsZh ? "占用最高进程" : "Top memory process";
+        QueueItemTwoBodyText.Text = topProcess is null
+            ? (IsZh ? "当前未读取到进程列表。" : "No process list was captured.")
+            : $"{topProcess.Name} · {FormatMb(topProcess.MemoryMb)}";
+        QueueItemThreeTitleText.Text = IsZh ? "当前 DNS" : "Current DNS";
+        QueueItemThreeBodyText.Text = dnsSummary;
+
+        CoreDescriptionText.Text = IsZh
+            ? "AETHER 已完成本机只读扫描。下一步将把系统、DNS、网络和进程数据接入分析评分。"
+            : "AETHER completed a local read-only scan. Next, OS, DNS, network, and process data will feed the analysis score.";
     }
 
     private void NavigateTo(string page)
@@ -236,6 +339,15 @@ public partial class MainWindow : Window
 
     private (string Title, string Body, string Badge, string Accent)[] GetModuleRows(string page)
     {
+        if (_lastSnapshot is not null)
+        {
+            var liveRows = GetLiveModuleRows(page, _lastSnapshot);
+            if (liveRows.Length > 0)
+            {
+                return liveRows;
+            }
+        }
+
         if (IsZh)
         {
             return page switch
@@ -374,6 +486,82 @@ public partial class MainWindow : Window
             },
             _ => Array.Empty<(string Title, string Body, string Badge, string Accent)>()
         };
+    }
+
+    private (string Title, string Body, string Badge, string Accent)[] GetLiveModuleRows(string page, SystemSnapshot snapshot)
+    {
+        var topProcess = snapshot.TopProcesses.FirstOrDefault();
+        var primaryStorage = snapshot.Hardware.Storage.FirstOrDefault();
+        var dnsSummary = snapshot.Network.CurrentDnsServers.Count == 0
+            ? (IsZh ? "未检测到 DNS 服务器，后续需要平台适配增强。" : "No DNS servers detected; platform adapter needs future enhancement.")
+            : string.Join(", ", snapshot.Network.CurrentDnsServers);
+
+        if (IsZh)
+        {
+            return page switch
+            {
+                "pc" => new[]
+                {
+                    ("系统信息", $"{snapshot.OperatingSystem.Name} / {snapshot.OperatingSystem.Architecture} / {snapshot.OperatingSystem.DeviceName}", "真实", "green"),
+                    ("CPU", snapshot.Hardware.CpuName, "只读", "blue"),
+                    ("内存", $"{FormatMb(snapshot.Hardware.MemoryUsedMb)} 已用 / {FormatMb(snapshot.Hardware.MemoryTotalMb)} 总量。", "真实", "green"),
+                    ("占用最高进程", topProcess is null ? "未读取到进程列表。" : $"{topProcess.Name} · PID {topProcess.ProcessId} · {FormatMb(topProcess.MemoryMb)}", "进程", "amber")
+                },
+                "dns" => new[]
+                {
+                    ("当前 DNS", dnsSummary, "真实", snapshot.Network.CurrentDnsServers.Count == 0 ? "amber" : "green"),
+                    ("360 安全 DNS", "Provider Registry 已验证：101.226.4.6、218.30.118.6。真实切换仍需测速、备份和确认。", "已验证", "green"),
+                    ("网络接口", $"{snapshot.Network.PrimaryInterfaceName} / {snapshot.Network.ConnectionType}", "只读", "blue"),
+                    ("回滚要求", "DNS 切换执行层尚未启用。后续必须保存原 DNS 并支持一键恢复。", "必需", "amber")
+                },
+                "speed" => new[]
+                {
+                    ("网络接口", $"{snapshot.Network.PrimaryInterfaceName} / {snapshot.Network.ConnectionType}", "真实", "green"),
+                    ("运营商与地区", "公网 IP 归属地识别尚未启用。后续优先接入离线 IP 库。", "待接入", "amber"),
+                    ("轻量延迟测试", "完整测速会消耗流量，下一步先实现用户触发的 Ping/Jitter 模式。", "低占用", "blue"),
+                    ("存储参考", primaryStorage is null ? "未读取到磁盘状态。" : $"{primaryStorage.Name} 使用率 {primaryStorage.ActivePercent:0}% / 剩余 {primaryStorage.FreeGb} GB。", "上下文", "green")
+                },
+                _ => Array.Empty<(string Title, string Body, string Badge, string Accent)>()
+            };
+        }
+
+        return page switch
+        {
+            "pc" => new[]
+            {
+                ("System", $"{snapshot.OperatingSystem.Name} / {snapshot.OperatingSystem.Architecture} / {snapshot.OperatingSystem.DeviceName}", "Live", "green"),
+                ("CPU", snapshot.Hardware.CpuName, "Read-only", "blue"),
+                ("Memory", $"{FormatMb(snapshot.Hardware.MemoryUsedMb)} used / {FormatMb(snapshot.Hardware.MemoryTotalMb)} total.", "Live", "green"),
+                ("Top Process", topProcess is null ? "No process list was captured." : $"{topProcess.Name} · PID {topProcess.ProcessId} · {FormatMb(topProcess.MemoryMb)}", "Process", "amber")
+            },
+            "dns" => new[]
+            {
+                ("Current DNS", dnsSummary, snapshot.Network.CurrentDnsServers.Count == 0 ? "Watch" : "Live", snapshot.Network.CurrentDnsServers.Count == 0 ? "amber" : "green"),
+                ("360 Secure DNS", "Provider registry verified: 101.226.4.6 and 218.30.118.6. Real switching still requires benchmark, backup, and confirmation.", "Verified", "green"),
+                ("Network Interface", $"{snapshot.Network.PrimaryInterfaceName} / {snapshot.Network.ConnectionType}", "Read-only", "blue"),
+                ("Rollback Requirement", "DNS switching is not enabled yet. Future execution must save original DNS and support one-click restore.", "Required", "amber")
+            },
+            "speed" => new[]
+            {
+                ("Network Interface", $"{snapshot.Network.PrimaryInterfaceName} / {snapshot.Network.ConnectionType}", "Live", "green"),
+                ("ISP And Region", "Public IP region detection is not enabled yet. Offline IP data is the preferred next provider.", "Pending", "amber"),
+                ("Light Latency Test", "Full speed tests consume traffic. Next step is user-triggered Ping/Jitter mode first.", "Low load", "blue"),
+                ("Storage Context", primaryStorage is null ? "No drive state was captured." : $"{primaryStorage.Name} usage {primaryStorage.ActivePercent:0}% / {primaryStorage.FreeGb} GB free.", "Context", "green")
+            },
+            _ => Array.Empty<(string Title, string Body, string Badge, string Accent)>()
+        };
+    }
+
+    private static string FormatMb(long mb)
+    {
+        if (mb <= 0)
+        {
+            return "--";
+        }
+
+        return mb >= 1024
+            ? $"{mb / 1024d:0.0} GB"
+            : $"{mb} MB";
     }
 
     private Border CreateModuleCard(string title, string body, string badge, string accent)

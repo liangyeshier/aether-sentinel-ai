@@ -32,7 +32,7 @@ Current phase:
 Phase 03 - Read-only System Intelligence Foundation
 ```
 
-The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, and core read-only intelligence contracts. Real system scanning and optimization execution are still disabled.
+The current prototype includes the product foundation, runnable desktop shell, clickable module previews, reserved DNS Optimization, Network Speed Test planning, core read-only intelligence contracts, and first local read-only scanning. Optimization execution is still disabled.
 
 ## Technical Direction
 
@@ -44,7 +44,7 @@ The current prototype includes the product foundation, runnable desktop shell, c
 
 ## Run The Prototype
 
-Phase 03 includes a runnable Avalonia desktop shell with clickable module pages, simulated read-only capability previews, and the first cross-platform core contracts.
+Phase 03 includes a runnable Avalonia desktop shell with clickable module pages, read-only capability previews, the first cross-platform core contracts, and local read-only scanning.
 
 Requirements:
 
@@ -66,9 +66,10 @@ Current prototype scope:
 - Simulated AI optimization queue.
 - Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, DNS optimization, network speed testing, AI advisor, history, and settings.
 - Core models for read-only system snapshots, network quality, DNS candidates, and speed test results.
+- Local read-only scan button for OS, memory, storage, process, network interface, and DNS data.
 - Verified 360 Secure DNS provider registry entry.
 
-No real system scanning or optimization is executed in this prototype.
+No optimization is executed in this prototype.
 
 ## Documentation
 

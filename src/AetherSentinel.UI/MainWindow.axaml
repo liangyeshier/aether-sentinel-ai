@@ -143,7 +143,7 @@
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
           <Button x:Name="ZhButton" Classes="lang active" Content="简" Click="OnChineseClicked" />
           <Button x:Name="EnButton" Classes="lang" Content="EN" Click="OnEnglishClicked" />
-          <Button x:Name="ScanButton" Classes="secondary" Content="Scan" />
+          <Button x:Name="ScanButton" Classes="secondary" Content="Scan" Click="OnScanClicked" />
           <Button x:Name="OptimizeButton" Classes="primary" Content="AI Optimize" />
         </StackPanel>
       </Grid>
@@ -152,7 +152,7 @@
         <Border Classes="card" Padding="16">
           <StackPanel Spacing="7">
             <TextBlock Text="CPU" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
-            <TextBlock Text="82%" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock x:Name="CpuMetricText" Text="82%" FontSize="26" FontWeight="SemiBold" />
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="130" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource AmberBrush}" />
             </Border>
@@ -162,7 +162,7 @@
         <Border Grid.Column="1" Classes="card" Padding="16">
           <StackPanel Spacing="7">
             <TextBlock Text="GPU" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
-            <TextBlock Text="96%" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock x:Name="GpuMetricText" Text="96%" FontSize="26" FontWeight="SemiBold" />
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="152" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource RedBrush}" />
             </Border>
@@ -172,7 +172,7 @@
         <Border Grid.Column="2" Classes="card" Padding="16">
           <StackPanel Spacing="7">
             <TextBlock Text="MEMORY" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
-            <TextBlock Text="65%" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock x:Name="MemoryMetricText" Text="65%" FontSize="26" FontWeight="SemiBold" />
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="104" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource BlueBrush}" />
             </Border>
@@ -182,7 +182,7 @@
         <Border Grid.Column="3" Classes="card" Padding="16">
           <StackPanel Spacing="7">
             <TextBlock Text="DISK" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
-            <TextBlock Text="41%" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock x:Name="DiskMetricText" Text="41%" FontSize="26" FontWeight="SemiBold" />
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="66" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource GreenBrush}" />
             </Border>

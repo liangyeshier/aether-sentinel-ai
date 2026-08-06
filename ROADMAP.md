@@ -68,6 +68,9 @@ Current deliverables:
 - Core project added to the solution.
 - Read-only system snapshot models.
 - Platform adapter interface boundary.
+- `AetherSentinel.Platforms` project added to the solution.
+- First local read-only adapter for OS, memory, storage, process, network interface, and DNS data.
+- Scan button updates dashboard and live module cards.
 - Network quality, DNS, ISP region, and speed test models.
 - Network Speed Test navigation reservation.
 - Network Intelligence planning document.
@@ -75,8 +78,7 @@ Current deliverables:
 Remaining:
 
 - Windows read-only adapter implementation.
-- macOS read-only adapter implementation.
-- Real current DNS detection.
+- macOS read-only adapter expansion for GPU, startup items, and richer CPU sampling.
 - Real ISP and region lookup provider.
 - User-approved speed test execution.
 
