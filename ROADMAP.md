@@ -17,6 +17,18 @@ Scope:
 - Milestone framework
 - Automatic update architecture reservation
 
+## Phase 01 - Desktop Shell Preview
+
+Status: Completed
+
+Scope:
+
+- Runnable Avalonia UI application shell.
+- Dashboard visual prototype.
+- Static simulated performance data.
+- No production optimization features.
+- No real system data collection.
+
 ## Future Product Expansion
 
 The architecture reserves space for future AETHER product lines:

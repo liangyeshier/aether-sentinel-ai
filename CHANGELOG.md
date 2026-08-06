@@ -16,3 +16,15 @@ This project follows phase-based development. Each completed phase must include 
 - Issue templates.
 - Milestone documentation.
 - Reserved CI, release, and update workflow locations.
+
+## [0.1.0] - Phase 01 Desktop Shell
+
+### Added
+
+- Avalonia UI desktop project.
+- Runnable dashboard prototype.
+- BoosterX-inspired dark performance layout.
+- Static navigation structure.
+- Simulated system metric cards.
+- Simulated AI Performance Core panel.
+- Simulated optimization queue and Sentinel Feed.

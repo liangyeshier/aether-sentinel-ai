@@ -42,6 +42,31 @@ Phase 00 establishes the product foundation only. It does not include production
 - Primary target runtime: Windows 10 and Windows 11
 - Future runtime target: macOS
 
+## Run The Prototype
+
+Phase 01 includes a runnable Avalonia desktop shell with simulated performance data.
+
+Requirements:
+
+- .NET 8 SDK
+
+Run:
+
+```bash
+dotnet restore AetherSentinel.sln
+dotnet run --project src/AetherSentinel.UI/AetherSentinel.UI.csproj
+```
+
+Current prototype scope:
+
+- Desktop shell.
+- BoosterX-inspired dark performance dashboard.
+- Static navigation.
+- Simulated performance metrics.
+- Simulated AI optimization queue.
+
+No real system scanning or optimization is executed in this prototype.
+
 ## Documentation
 
 Important product, engineering, and design decisions are maintained in `docs/`.
@@ -54,6 +79,7 @@ Core documents:
 - `docs/GITHUB_WORKFLOW.md`
 - `docs/MILESTONES.md`
 - `docs/PHASE-00-REPORT.md`
+- `docs/PHASE-01-REPORT.md`
 
 ## Repository Governance
 
