@@ -4,6 +4,22 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.5] - Phase 03.2 Read-only Performance Scoring
+
+### Added
+
+- Core performance analysis report model.
+- Read-only performance analyzer.
+- Overall score calculation from memory, storage, process, DNS, and network factors.
+- Optimization potential classification.
+- Read-only recommendation generation with risk, verification, and rollback metadata.
+- Dashboard score updates from the latest scan analysis.
+- Live analysis cards for Optimization Center and AI Advisor.
+
+### Changed
+
+- Optimization Queue now displays analysis recommendations after a read-only scan.
+
 ## [0.3.4] - macOS Read-only Scan Validation
 
 ### Added

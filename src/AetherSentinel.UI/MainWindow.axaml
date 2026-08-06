@@ -196,7 +196,7 @@
           <StackPanel Spacing="14">
             <StackPanel>
               <TextBlock x:Name="CoreTitleText" Text="AI PERFORMANCE CORE" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
-              <TextBlock Text="87 / 100" FontSize="50" FontWeight="Bold" Margin="0,6,0,0" />
+              <TextBlock x:Name="PerformanceScoreText" Text="87 / 100" FontSize="50" FontWeight="Bold" Margin="0,6,0,0" />
               <TextBlock x:Name="CoreDescriptionText" Text="Performance is strong, but GPU pressure and background load should be watched before gaming sessions." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" MaxWidth="390" />
             </StackPanel>
 

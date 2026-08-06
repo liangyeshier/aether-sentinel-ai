@@ -18,6 +18,8 @@ In Progress
 - Connected the Scan button to real local read-only capture.
 - Added live dashboard updates after scanning.
 - Added live module cards for PC Intelligence, DNS Optimization, and Network Speed Test after scanning.
+- Added read-only performance scoring and optimization potential analysis.
+- Added analyzer-backed Optimization Center and AI Advisor live cards.
 - Added performance budget policy for low-overhead defaults.
 - Added network quality, ISP region, DNS candidate, and network speed test models.
 - Added verified 360 Secure DNS provider registry metadata.
@@ -39,6 +41,8 @@ In Progress
 - `src/AetherSentinel.Core/Scanning/SystemSnapshot.cs`
 - `src/AetherSentinel.Core/Scanning/ISystemScanner.cs`
 - `src/AetherSentinel.Core/Scanning/IPlatformSystemAdapter.cs`
+- `src/AetherSentinel.Core/Analysis/PerformanceAnalysisReport.cs`
+- `src/AetherSentinel.Core/Analysis/PerformanceAnalyzer.cs`
 - `src/AetherSentinel.Core/Performance/PerformanceBudgetPolicy.cs`
 - `src/AetherSentinel.Core/Network/NetworkSpeedTestModels.cs`
 - `src/AetherSentinel.Core/Network/INetworkSpeedTestProvider.cs`
@@ -86,6 +90,7 @@ Required verification:
 - Network speed testing is not implemented yet.
 - 360 DNS is registered, but DNS switching is not implemented yet.
 - Network Speed Test still displays read-only context and planning cards after scan.
+- CPU, GPU, startup item, game session, and real network latency are not included in the score yet.
 
 ## Risk
 

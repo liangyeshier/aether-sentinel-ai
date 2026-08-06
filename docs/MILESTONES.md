@@ -96,6 +96,8 @@ Deliverables:
 - `AetherSentinel.Platforms` project. Completed.
 - First local read-only scan adapter. Completed.
 - Scan button UI integration. Completed.
+- Read-only scoring analyzer. Completed.
+- Optimization potential and recommendation generation. Completed.
 - Network quality, DNS, ISP region, and speed test models. Completed.
 - Network Intelligence planning document. Completed.
 - Windows read-only adapter implementation. Planned.

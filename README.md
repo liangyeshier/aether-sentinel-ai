@@ -67,6 +67,7 @@ Current prototype scope:
 - Read-only module previews for PC intelligence, game optimization, monitoring, optimization center, DNS optimization, network speed testing, AI advisor, history, and settings.
 - Core models for read-only system snapshots, network quality, DNS candidates, and speed test results.
 - Local read-only scan button for OS, memory, storage, process, network interface, and DNS data.
+- Read-only performance score, optimization potential, and recommendation generation.
 - Verified 360 Secure DNS provider registry entry.
 
 No optimization is executed in this prototype.
@@ -90,6 +91,7 @@ Core documents:
 - `docs/PHASE-02-1-REPORT.md`
 - `docs/PHASE-03-REPORT.md`
 - `docs/PHASE-03-1-MACOS-TEST-REPORT.md`
+- `docs/PHASE-03-2-ANALYSIS-REPORT.md`
 
 ## Repository Governance
 

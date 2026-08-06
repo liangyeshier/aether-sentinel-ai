@@ -71,6 +71,8 @@ Current deliverables:
 - `AetherSentinel.Platforms` project added to the solution.
 - First local read-only adapter for OS, memory, storage, process, network interface, and DNS data.
 - Scan button updates dashboard and live module cards.
+- Read-only performance analyzer added.
+- Overall score, optimization potential, score factors, and recommendations generated from scan data.
 - Network quality, DNS, ISP region, and speed test models.
 - Network Speed Test navigation reservation.
 - Network Intelligence planning document.

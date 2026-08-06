@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading;
+using AetherSentinel.Core.Analysis;
 using AetherSentinel.Core.Performance;
 using AetherSentinel.Core.Scanning;
 using AetherSentinel.Platforms.Scanning;
@@ -16,7 +17,9 @@ namespace AetherSentinel.UI;
 public partial class MainWindow : Window
 {
     private readonly ISystemScanner _systemScanner = new PlatformSystemScanner(new LocalPlatformSystemAdapter());
+    private readonly IPerformanceAnalyzer _performanceAnalyzer = new PerformanceAnalyzer();
     private SystemSnapshot? _lastSnapshot;
+    private PerformanceAnalysisReport? _lastReport;
     private string _currentLanguage = "zh-CN";
     private string _currentPage = "dashboard";
 
@@ -63,6 +66,7 @@ public partial class MainWindow : Window
                     Budget: PerformanceBudgetPolicy.DefaultLowOverhead),
                 CancellationToken.None);
 
+            _lastReport = _performanceAnalyzer.Analyze(_lastSnapshot);
             ApplySnapshot(_lastSnapshot);
             NavigateTo(_currentPage);
         }
@@ -163,6 +167,7 @@ public partial class MainWindow : Window
 
         if (_lastSnapshot is not null)
         {
+            _lastReport ??= _performanceAnalyzer.Analyze(_lastSnapshot);
             ApplySnapshot(_lastSnapshot);
         }
 
@@ -171,6 +176,7 @@ public partial class MainWindow : Window
 
     private void ApplySnapshot(SystemSnapshot snapshot)
     {
+        var report = _lastReport ?? _performanceAnalyzer.Analyze(snapshot);
         var memoryPercent = snapshot.Hardware.MemoryTotalMb <= 0
             ? 0
             : Math.Round((double)snapshot.Hardware.MemoryUsedMb / snapshot.Hardware.MemoryTotalMb * 100);
@@ -207,23 +213,90 @@ public partial class MainWindow : Window
 
         CurrentStateBodyTitleText.Text = IsZh ? "只读扫描完成" : "Read-only scan complete";
         CurrentStateBodyText.Text = IsZh
-            ? $"{snapshot.OperatingSystem.Name}，{snapshot.Network.PrimaryInterfaceName}，DNS：{dnsSummary}"
-            : $"{snapshot.OperatingSystem.Name}, {snapshot.Network.PrimaryInterfaceName}, DNS: {dnsSummary}";
+            ? $"评分 {report.OverallScore}/100，优化潜力：{TranslatePotential(report.OptimizationPotential)}，DNS：{dnsSummary}"
+            : $"Score {report.OverallScore}/100, potential: {TranslatePotential(report.OptimizationPotential)}, DNS: {dnsSummary}";
 
-        QueueItemOneTitleText.Text = IsZh ? "本机系统" : "Local system";
-        QueueItemOneBodyText.Text = IsZh
-            ? $"{snapshot.OperatingSystem.DeviceName} / {snapshot.OperatingSystem.Architecture}"
-            : $"{snapshot.OperatingSystem.DeviceName} / {snapshot.OperatingSystem.Architecture}";
-        QueueItemTwoTitleText.Text = IsZh ? "占用最高进程" : "Top memory process";
-        QueueItemTwoBodyText.Text = topProcess is null
-            ? (IsZh ? "当前未读取到进程列表。" : "No process list was captured.")
-            : $"{topProcess.Name} · {FormatMb(topProcess.MemoryMb)}";
-        QueueItemThreeTitleText.Text = IsZh ? "当前 DNS" : "Current DNS";
-        QueueItemThreeBodyText.Text = dnsSummary;
+        PerformanceScoreText.Text = $"{report.OverallScore} / 100";
+
+        ApplyRecommendationQueue(report, topProcess, dnsSummary);
 
         CoreDescriptionText.Text = IsZh
-            ? "AETHER 已完成本机只读扫描。下一步将把系统、DNS、网络和进程数据接入分析评分。"
-            : "AETHER completed a local read-only scan. Next, OS, DNS, network, and process data will feed the analysis score.";
+            ? $"AETHER 已完成只读分析，当前优化潜力为{TranslatePotential(report.OptimizationPotential)}。所有建议仍为只读解释，不会自动执行。"
+            : $"AETHER completed read-only analysis. Optimization potential is {TranslatePotential(report.OptimizationPotential)}. Recommendations remain read-only.";
+    }
+
+    private void ApplyRecommendationQueue(
+        PerformanceAnalysisReport report,
+        ProcessSnapshot? topProcess,
+        string dnsSummary)
+    {
+        var recommendations = report.Recommendations.Take(3).ToArray();
+
+        QueueItemOneTitleText.Text = recommendations.ElementAtOrDefault(0)?.Title ?? (IsZh ? "本机系统" : "Local system");
+        QueueItemOneBodyText.Text = recommendations.ElementAtOrDefault(0) is { } first
+            ? TranslateRecommendation(first)
+            : (IsZh ? "已完成只读扫描。" : "Read-only scan completed.");
+
+        QueueItemTwoTitleText.Text = recommendations.ElementAtOrDefault(1)?.Title ?? (IsZh ? "占用最高进程" : "Top memory process");
+        QueueItemTwoBodyText.Text = recommendations.ElementAtOrDefault(1) is { } second
+            ? TranslateRecommendation(second)
+            : topProcess is null
+                ? (IsZh ? "当前未读取到进程列表。" : "No process list was captured.")
+                : $"{topProcess.Name} · {FormatMb(topProcess.MemoryMb)}";
+
+        QueueItemThreeTitleText.Text = recommendations.ElementAtOrDefault(2)?.Title ?? (IsZh ? "当前 DNS" : "Current DNS");
+        QueueItemThreeBodyText.Text = recommendations.ElementAtOrDefault(2) is { } third
+            ? TranslateRecommendation(third)
+            : dnsSummary;
+    }
+
+    private string TranslatePotential(OptimizationPotentialLevel potential)
+    {
+        if (!IsZh)
+        {
+            return potential.ToString();
+        }
+
+        return potential switch
+        {
+            OptimizationPotentialLevel.High => "高",
+            OptimizationPotentialLevel.Medium => "中",
+            _ => "低"
+        };
+    }
+
+    private string TranslateRecommendation(OptimizationRecommendation recommendation)
+    {
+        if (!IsZh)
+        {
+            return recommendation.Detail;
+        }
+
+        return recommendation.Category switch
+        {
+            RecommendationCategory.Memory => "建议复核高内存后台进程，游戏或创作前保留更多可用内存。",
+            RecommendationCategory.Storage => "建议检查可用空间，避免大型游戏更新、缓存或视频导出受影响。",
+            RecommendationCategory.Process => "发现后台负载可能占用性能余量；当前仅提示，不会自动关闭进程。",
+            RecommendationCategory.Dns => "建议先对当前 DNS 与 360 安全 DNS 做延迟、抖动和失败率对比。",
+            RecommendationCategory.Network => "建议复核网络接口状态，后续进入轻量 Ping/Jitter 检测。",
+            _ => "当前基线看起来健康，后续扫描将用于对比变化。"
+        };
+    }
+
+    private string TranslateRisk(RiskLevel riskLevel)
+    {
+        if (!IsZh)
+        {
+            return riskLevel.ToString();
+        }
+
+        return riskLevel switch
+        {
+            RiskLevel.Low => "低",
+            RiskLevel.Medium => "中",
+            RiskLevel.High => "高",
+            _ => "只读"
+        };
     }
 
     private void NavigateTo(string page)
@@ -490,8 +563,11 @@ public partial class MainWindow : Window
 
     private (string Title, string Body, string Badge, string Accent)[] GetLiveModuleRows(string page, SystemSnapshot snapshot)
     {
+        var report = _lastReport ?? _performanceAnalyzer.Analyze(snapshot);
         var topProcess = snapshot.TopProcesses.FirstOrDefault();
         var primaryStorage = snapshot.Hardware.Storage.FirstOrDefault();
+        var factors = report.Factors.ToArray();
+        var recommendations = report.Recommendations.ToArray();
         var dnsSummary = snapshot.Network.CurrentDnsServers.Count == 0
             ? (IsZh ? "未检测到 DNS 服务器，后续需要平台适配增强。" : "No DNS servers detected; platform adapter needs future enhancement.")
             : string.Join(", ", snapshot.Network.CurrentDnsServers);
@@ -521,6 +597,20 @@ public partial class MainWindow : Window
                     ("轻量延迟测试", "完整测速会消耗流量，下一步先实现用户触发的 Ping/Jitter 模式。", "低占用", "blue"),
                     ("存储参考", primaryStorage is null ? "未读取到磁盘状态。" : $"{primaryStorage.Name} 使用率 {primaryStorage.ActivePercent:0}% / 剩余 {primaryStorage.FreeGb} GB。", "上下文", "green")
                 },
+                "optimization" => new[]
+                {
+                    ("综合评分", $"当前只读评分 {report.OverallScore}/100，优化潜力：{TranslatePotential(report.OptimizationPotential)}。", "评分", GetScoreAccent(report.OverallScore)),
+                    ("主要风险", factors.OrderBy(factor => factor.Score).FirstOrDefault() is { } weakest ? $"{TranslateFactorTitle(weakest)}：{weakest.Detail}" : "未发现明显风险。", "分析", "amber"),
+                    ("推荐动作", recommendations.FirstOrDefault() is { } first ? TranslateRecommendation(first) : "当前无需执行优化。", "只读", "blue"),
+                    ("执行状态", "仍处于 Dry Run 之前阶段，不会修改系统、DNS 或进程。", "安全", "green")
+                },
+                "advisor" => new[]
+                {
+                    ("AI 摘要", $"本次扫描生成 {factors.Length} 个评分因子和 {recommendations.Length} 条只读建议。", "分析", "blue"),
+                    ("优化潜力", $"当前判断为{TranslatePotential(report.OptimizationPotential)}，后续会结合游戏会话和实时监控继续校准。", "潜力", GetScoreAccent(report.OverallScore)),
+                    ("风险透明", recommendations.FirstOrDefault() is { } first ? $"风险等级：{TranslateRisk(first.RiskLevel)}；验证信号：{first.VerificationSignal}" : "暂无风险建议。", "解释", "amber"),
+                    ("执行边界", "AI 顾问只解释扫描报告，不直接控制系统。", "只读", "green")
+                },
                 _ => Array.Empty<(string Title, string Body, string Badge, string Accent)>()
             };
         }
@@ -548,6 +638,20 @@ public partial class MainWindow : Window
                 ("Light Latency Test", "Full speed tests consume traffic. Next step is user-triggered Ping/Jitter mode first.", "Low load", "blue"),
                 ("Storage Context", primaryStorage is null ? "No drive state was captured." : $"{primaryStorage.Name} usage {primaryStorage.ActivePercent:0}% / {primaryStorage.FreeGb} GB free.", "Context", "green")
             },
+            "optimization" => new[]
+            {
+                ("Overall Score", $"Current read-only score is {report.OverallScore}/100. Optimization potential: {TranslatePotential(report.OptimizationPotential)}.", "Score", GetScoreAccent(report.OverallScore)),
+                ("Primary Risk", factors.OrderBy(factor => factor.Score).FirstOrDefault() is { } weakest ? $"{weakest.Title}: {weakest.Detail}" : "No clear risk found.", "Analysis", "amber"),
+                ("Recommended Action", recommendations.FirstOrDefault()?.Detail ?? "No optimization action is needed right now.", "Read-only", "blue"),
+                ("Execution State", "Still before Dry Run; no system, DNS, or process change will be applied.", "Safe", "green")
+            },
+            "advisor" => new[]
+            {
+                ("AI Summary", $"This scan produced {factors.Length} score factors and {recommendations.Length} read-only recommendations.", "Analysis", "blue"),
+                ("Optimization Potential", $"Current potential is {TranslatePotential(report.OptimizationPotential)}. Future game sessions and monitoring will calibrate this.", "Potential", GetScoreAccent(report.OverallScore)),
+                ("Risk Transparency", recommendations.FirstOrDefault() is { } first ? $"Risk: {first.RiskLevel}. Verification: {first.VerificationSignal}" : "No risk recommendation yet.", "Explain", "amber"),
+                ("Execution Boundary", "AI Advisor explains scan reports; it does not control the system.", "Read-only", "green")
+            },
             _ => Array.Empty<(string Title, string Body, string Badge, string Accent)>()
         };
     }
@@ -564,12 +668,41 @@ public partial class MainWindow : Window
             : $"{mb} MB";
     }
 
+    private string TranslateFactorTitle(ScoreFactor factor)
+    {
+        if (!IsZh)
+        {
+            return factor.Title;
+        }
+
+        return factor.Key switch
+        {
+            "memory" => "内存",
+            "storage" => "存储",
+            "process" => "后台负载",
+            "dns" => "DNS",
+            "network" => "网络",
+            _ => factor.Title
+        };
+    }
+
+    private static string GetScoreAccent(int score)
+    {
+        return score switch
+        {
+            >= 85 => "green",
+            >= 70 => "amber",
+            _ => "red"
+        };
+    }
+
     private Border CreateModuleCard(string title, string body, string badge, string accent)
     {
         IBrush accentBrush = accent switch
         {
             "green" => Brushes.SpringGreen,
             "amber" => new SolidColorBrush(Color.Parse("#F2B84B")),
+            "red" => new SolidColorBrush(Color.Parse("#FF4D5E")),
             _ => new SolidColorBrush(Color.Parse("#2F80FF"))
         };
 
