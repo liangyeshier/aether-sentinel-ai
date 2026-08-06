@@ -60,6 +60,7 @@ In Progress
 - Core must remain cross-platform and must not reference Avalonia, WMI, registry APIs, shell commands, `system_profiler`, or `networksetup`.
 - Platform-specific command usage belongs in `AetherSentinel.Platforms`.
 - The first local adapter may use macOS `sysctl`, `vm_stat`, and `networksetup` in read-only mode.
+- macOS DNS detection may fall back to `scutil --dns` when service-level DNS is not configured.
 - Network Speed Test is part of Network Intelligence and must be read-only until user-approved traffic tests are implemented.
 - China mainland ISP and region detection should prefer replaceable offline data providers before any public API.
 - Full-bandwidth speed tests must require explicit user consent because they consume traffic.
@@ -75,6 +76,7 @@ In Progress
 Required verification:
 
 - `dotnet build AetherSentinel.sln --no-restore`
+- `docs/PHASE-03-1-MACOS-TEST-REPORT.md`
 
 ## Known Issues
 

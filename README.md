@@ -89,6 +89,7 @@ Core documents:
 - `docs/PHASE-02-REPORT.md`
 - `docs/PHASE-02-1-REPORT.md`
 - `docs/PHASE-03-REPORT.md`
+- `docs/PHASE-03-1-MACOS-TEST-REPORT.md`
 
 ## Repository Governance
 

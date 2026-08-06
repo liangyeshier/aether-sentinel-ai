@@ -4,6 +4,17 @@ All notable changes to AETHER SENTINEL AI will be documented in this file.
 
 This project follows phase-based development. Each completed phase must include a corresponding report in `docs/`.
 
+## [0.3.4] - macOS Read-only Scan Validation
+
+### Added
+
+- macOS read-only scan validation report.
+- Windows inferred test matrix for current Phase 03.1 scanner behavior.
+
+### Changed
+
+- macOS DNS detection now falls back from `networksetup` service DNS to `scutil --dns` resolver DNS.
+
 ## [0.3.3] - Phase 03.1 Local Read-only Scan
 
 ### Added

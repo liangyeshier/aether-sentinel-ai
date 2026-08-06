@@ -330,7 +330,27 @@ public sealed class LocalPlatformSystemAdapter : IPlatformSystemAdapter
                 .Where(IsPotentialDnsAddress));
         }
 
+        if (servers.Count == 0)
+        {
+            servers.AddRange(await ReadMacOsResolverDnsServersAsync(cancellationToken));
+        }
+
         return servers.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    private static async ValueTask<IReadOnlyList<string>> ReadMacOsResolverDnsServersAsync(CancellationToken cancellationToken)
+    {
+        var output = await RunCommandAsync("/usr/sbin/scutil", cancellationToken, "--dns");
+
+        return output
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(line => line.StartsWith("nameserver[", StringComparison.OrdinalIgnoreCase))
+            .Select(line => line.Split(':', 2, StringSplitOptions.TrimEntries))
+            .Where(parts => parts.Length == 2)
+            .Select(parts => parts[1])
+            .Where(IsPotentialDnsAddress)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
     }
 
     private static async ValueTask<IReadOnlyList<string>> ReadWindowsDnsServersAsync(CancellationToken cancellationToken)
