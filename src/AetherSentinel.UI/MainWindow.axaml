@@ -189,30 +189,30 @@
       </Grid>
 
       <Grid Grid.Row="2" ColumnDefinitions="1.1*,0.9*" ColumnSpacing="16">
-        <Border Classes="card" Padding="24">
-          <Grid RowDefinitions="Auto,*,Auto">
+        <Border Classes="card" Padding="20">
+          <StackPanel Spacing="14">
             <StackPanel>
               <TextBlock x:Name="CoreTitleText" Text="AI PERFORMANCE CORE" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
-              <TextBlock Text="87 / 100" FontSize="58" FontWeight="Bold" Margin="0,10,0,0" />
-              <TextBlock x:Name="CoreDescriptionText" Text="Performance is strong, but GPU pressure and background load should be watched before gaming sessions." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="14" MaxWidth="420" />
+              <TextBlock Text="87 / 100" FontSize="50" FontWeight="Bold" Margin="0,6,0,0" />
+              <TextBlock x:Name="CoreDescriptionText" Text="Performance is strong, but GPU pressure and background load should be watched before gaming sessions." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" MaxWidth="390" />
             </StackPanel>
 
-            <Grid Grid.Row="1" Width="180" Height="180" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,18,0,16">
-              <Ellipse Stroke="#16283D" StrokeThickness="10" />
-              <Ellipse Stroke="{StaticResource BlueBrush}" StrokeThickness="10" StrokeDashArray="5,1.55" StrokeLineCap="Round" />
-              <Ellipse Width="118" Height="118" Fill="#0A111B" Stroke="#1C334B" StrokeThickness="1" />
+            <Grid Width="142" Height="142" HorizontalAlignment="Center" Margin="0,2,0,0">
+              <Ellipse Stroke="#16283D" StrokeThickness="8" />
+              <Ellipse Stroke="{StaticResource BlueBrush}" StrokeThickness="8" StrokeDashArray="5,1.6" StrokeLineCap="Round" />
+              <Ellipse Width="94" Height="94" Fill="#0A111B" Stroke="#1C334B" StrokeThickness="1" />
               <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
-                <TextBlock x:Name="GuardianLabelText" Text="GUARDIAN" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" FontSize="11" FontWeight="SemiBold" />
-                <TextBlock x:Name="ActiveStatusText" Text="ACTIVE" HorizontalAlignment="Center" FontSize="23" FontWeight="Bold" />
-                <TextBlock x:Name="SafeModeText" Text="Verified Safe Mode" HorizontalAlignment="Center" Foreground="{StaticResource GreenBrush}" FontSize="11" />
+                <TextBlock x:Name="GuardianLabelText" Text="GUARDIAN" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" FontSize="10" FontWeight="SemiBold" />
+                <TextBlock x:Name="ActiveStatusText" Text="ACTIVE" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" />
+                <TextBlock x:Name="SafeModeText" Text="Verified Safe Mode" HorizontalAlignment="Center" Foreground="{StaticResource GreenBrush}" FontSize="10" />
               </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
-              <Button x:Name="AnalyzeButton" Classes="primary" Content="Analyze Now" />
-              <Button x:Name="ReportButton" Grid.Column="1" Classes="secondary" Content="View Report" />
-            </Grid>
-          </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12" Margin="0,0,0,0">
+              <Button x:Name="AnalyzeButton" Classes="primary" Content="Analyze Now" Width="116" Height="42" />
+              <Button x:Name="ReportButton" Classes="secondary" Content="View Report" Width="116" Height="42" />
+            </StackPanel>
+          </StackPanel>
         </Border>
 
         <Border Grid.Column="1" Classes="card" Padding="20">
