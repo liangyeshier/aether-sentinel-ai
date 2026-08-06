@@ -8,7 +8,7 @@
     MinWidth="1040"
     MinHeight="680"
     Background="#05070A"
-    FontFamily="Inter, Segoe UI, SF Pro">
+    FontFamily="Inter, PingFang SC, Microsoft YaHei, Segoe UI, SF Pro">
   <Window.Resources>
     <SolidColorBrush x:Key="DeepSpaceBrush" Color="#05070A" />
     <SolidColorBrush x:Key="AetherDarkBrush" Color="#0B0F14" />
@@ -67,6 +67,20 @@
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="Padding" Value="14,10" />
     </Style>
+    <Style Selector="Button.lang">
+      <Setter Property="Background" Value="#101722" />
+      <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="11,10" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.lang.active">
+      <Setter Property="Background" Value="#18283C" />
+      <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+      <Setter Property="BorderBrush" Value="#2F80FF" />
+    </Style>
   </Window.Styles>
 
   <Grid ColumnDefinitions="228,*,306" Background="{StaticResource DeepSpaceBrush}">
@@ -75,42 +89,42 @@
         <StackPanel Spacing="4">
           <TextBlock Text="AETHER" FontSize="21" FontWeight="Bold" LetterSpacing="0" />
           <TextBlock Text="SENTINEL AI" FontSize="12" Foreground="{StaticResource BlueBrush}" FontWeight="SemiBold" />
-          <TextBlock Text="Performance Intelligence" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,8,0,0" />
+          <TextBlock x:Name="BrandSubtitleText" Text="Performance Intelligence" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,8,0,0" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="0,32,0,0">
           <Border Classes="navItem active">
-            <TextBlock Text="Dashboard" />
+            <TextBlock x:Name="NavDashboardText" Text="Dashboard" />
           </Border>
           <Border Classes="navItem">
-            <TextBlock Text="PC Intelligence" />
+            <TextBlock x:Name="NavPcIntelligenceText" Text="PC Intelligence" />
           </Border>
           <Border Classes="navItem">
-            <TextBlock Text="Game Optimization" />
+            <TextBlock x:Name="NavGameOptimizationText" Text="Game Optimization" />
           </Border>
           <Border Classes="navItem">
-            <TextBlock Text="Performance Monitor" />
+            <TextBlock x:Name="NavPerformanceMonitorText" Text="Performance Monitor" />
           </Border>
           <Border Classes="navItem">
-            <TextBlock Text="Optimization Center" />
+            <TextBlock x:Name="NavOptimizationCenterText" Text="Optimization Center" />
           </Border>
           <Border Classes="navItem">
-            <TextBlock Text="AI Advisor" />
+            <TextBlock x:Name="NavAiAdvisorText" Text="AI Advisor" />
           </Border>
           <Border Classes="navItem">
-            <TextBlock Text="History" />
+            <TextBlock x:Name="NavHistoryText" Text="History" />
           </Border>
           <Border Classes="navItem">
-            <TextBlock Text="Settings" />
+            <TextBlock x:Name="NavSettingsText" Text="Settings" />
           </Border>
         </StackPanel>
 
         <Border Grid.Row="2" Classes="card" Padding="14">
           <StackPanel Spacing="9">
-            <TextBlock Text="SYSTEM GUARD" Foreground="{StaticResource TextMutedBrush}" FontSize="11" FontWeight="SemiBold" />
+            <TextBlock x:Name="SystemGuardTitleText" Text="SYSTEM GUARD" Foreground="{StaticResource TextMutedBrush}" FontSize="11" FontWeight="SemiBold" />
             <StackPanel Orientation="Horizontal" Spacing="8">
               <Ellipse Width="9" Height="9" Fill="{StaticResource GreenBrush}" VerticalAlignment="Center" />
-              <TextBlock Text="Local scan ready" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" />
+              <TextBlock x:Name="LocalScanReadyText" Text="Local scan ready" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" />
             </StackPanel>
           </StackPanel>
         </Border>
@@ -120,12 +134,14 @@
     <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*,Auto" Margin="24,22,22,22">
       <Grid ColumnDefinitions="*,Auto">
         <StackPanel>
-          <TextBlock Text="Dashboard" FontSize="28" FontWeight="SemiBold" />
-          <TextBlock Text="AI-native performance guardian for Windows PCs" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6,0,0" />
+          <TextBlock x:Name="PageTitleText" Text="Dashboard" FontSize="28" FontWeight="SemiBold" />
+          <TextBlock x:Name="PageSubtitleText" Text="AI-native performance guardian for Windows PCs" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6,0,0" />
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
-          <Button Classes="secondary" Content="Scan" />
-          <Button Classes="primary" Content="AI Optimize" />
+          <Button x:Name="ZhButton" Classes="lang active" Content="简" Click="OnChineseClicked" />
+          <Button x:Name="EnButton" Classes="lang" Content="EN" Click="OnEnglishClicked" />
+          <Button x:Name="ScanButton" Classes="secondary" Content="Scan" />
+          <Button x:Name="OptimizeButton" Classes="primary" Content="AI Optimize" />
         </StackPanel>
       </Grid>
 
@@ -137,7 +153,7 @@
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="130" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource AmberBrush}" />
             </Border>
-            <TextBlock Text="High load" Foreground="{StaticResource AmberBrush}" FontSize="12" />
+            <TextBlock x:Name="CpuStatusText" Text="High load" Foreground="{StaticResource AmberBrush}" FontSize="12" />
           </StackPanel>
         </Border>
         <Border Grid.Column="1" Classes="card" Padding="16">
@@ -147,7 +163,7 @@
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="152" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource RedBrush}" />
             </Border>
-            <TextBlock Text="Thermal watch" Foreground="{StaticResource RedBrush}" FontSize="12" />
+            <TextBlock x:Name="GpuStatusText" Text="Thermal watch" Foreground="{StaticResource RedBrush}" FontSize="12" />
           </StackPanel>
         </Border>
         <Border Grid.Column="2" Classes="card" Padding="16">
@@ -157,7 +173,7 @@
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="104" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource BlueBrush}" />
             </Border>
-            <TextBlock Text="Stable" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+            <TextBlock x:Name="MemoryStatusText" Text="Stable" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
           </StackPanel>
         </Border>
         <Border Grid.Column="3" Classes="card" Padding="16">
@@ -167,7 +183,7 @@
             <Border Height="6" CornerRadius="3" Background="#182334" ClipToBounds="True">
               <Border Width="66" HorizontalAlignment="Left" CornerRadius="3" Background="{StaticResource GreenBrush}" />
             </Border>
-            <TextBlock Text="Healthy" Foreground="{StaticResource GreenBrush}" FontSize="12" />
+            <TextBlock x:Name="DiskStatusText" Text="Healthy" Foreground="{StaticResource GreenBrush}" FontSize="12" />
           </StackPanel>
         </Border>
       </Grid>
@@ -176,48 +192,48 @@
         <Border Classes="card" Padding="24">
           <Grid RowDefinitions="Auto,*,Auto">
             <StackPanel>
-              <TextBlock Text="AI PERFORMANCE CORE" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
+              <TextBlock x:Name="CoreTitleText" Text="AI PERFORMANCE CORE" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
               <TextBlock Text="87 / 100" FontSize="58" FontWeight="Bold" Margin="0,10,0,0" />
-              <TextBlock Text="Performance is strong, but GPU pressure and background load should be watched before gaming sessions." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="14" MaxWidth="420" />
+              <TextBlock x:Name="CoreDescriptionText" Text="Performance is strong, but GPU pressure and background load should be watched before gaming sessions." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="14" MaxWidth="420" />
             </StackPanel>
 
-            <Grid Grid.Row="1" Width="260" Height="260" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,16">
-              <Ellipse Stroke="#16283D" StrokeThickness="18" />
-              <Ellipse Stroke="{StaticResource BlueBrush}" StrokeThickness="18" StrokeDashArray="5,1.15" StrokeLineCap="Round" />
-              <Ellipse Width="168" Height="168" Fill="#0A111B" Stroke="#1C334B" StrokeThickness="1" />
+            <Grid Grid.Row="1" Width="180" Height="180" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,18,0,16">
+              <Ellipse Stroke="#16283D" StrokeThickness="10" />
+              <Ellipse Stroke="{StaticResource BlueBrush}" StrokeThickness="10" StrokeDashArray="5,1.55" StrokeLineCap="Round" />
+              <Ellipse Width="118" Height="118" Fill="#0A111B" Stroke="#1C334B" StrokeThickness="1" />
               <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
-                <TextBlock Text="GUARDIAN" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
-                <TextBlock Text="ACTIVE" HorizontalAlignment="Center" FontSize="30" FontWeight="Bold" />
-                <TextBlock Text="Verified Safe Mode" HorizontalAlignment="Center" Foreground="{StaticResource GreenBrush}" FontSize="12" />
+                <TextBlock x:Name="GuardianLabelText" Text="GUARDIAN" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" FontSize="11" FontWeight="SemiBold" />
+                <TextBlock x:Name="ActiveStatusText" Text="ACTIVE" HorizontalAlignment="Center" FontSize="23" FontWeight="Bold" />
+                <TextBlock x:Name="SafeModeText" Text="Verified Safe Mode" HorizontalAlignment="Center" Foreground="{StaticResource GreenBrush}" FontSize="11" />
               </StackPanel>
             </Grid>
 
             <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
-              <Button Classes="primary" Content="Analyze Now" />
-              <Button Grid.Column="1" Classes="secondary" Content="View Report" />
+              <Button x:Name="AnalyzeButton" Classes="primary" Content="Analyze Now" />
+              <Button x:Name="ReportButton" Grid.Column="1" Classes="secondary" Content="View Report" />
             </Grid>
           </Grid>
         </Border>
 
         <Border Grid.Column="1" Classes="card" Padding="20">
           <StackPanel Spacing="15">
-            <TextBlock Text="Optimization Queue" FontSize="18" FontWeight="SemiBold" />
+            <TextBlock x:Name="QueueTitleText" Text="Optimization Queue" FontSize="18" FontWeight="SemiBold" />
             <Border Background="#0B141F" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
               <StackPanel Spacing="5">
-                <TextBlock Text="Reduce startup pressure" FontWeight="SemiBold" />
-                <TextBlock Text="3 background launch items require review." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
+                <TextBlock x:Name="QueueItemOneTitleText" Text="Reduce startup pressure" FontWeight="SemiBold" />
+                <TextBlock x:Name="QueueItemOneBodyText" Text="3 background launch items require review." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
               </StackPanel>
             </Border>
             <Border Background="#0B141F" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
               <StackPanel Spacing="5">
-                <TextBlock Text="GPU thermal watch" FontWeight="SemiBold" />
-                <TextBlock Text="High load detected. No automatic action will run without confirmation." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
+                <TextBlock x:Name="QueueItemTwoTitleText" Text="GPU thermal watch" FontWeight="SemiBold" />
+                <TextBlock x:Name="QueueItemTwoBodyText" Text="High load detected. No automatic action will run without confirmation." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
               </StackPanel>
             </Border>
             <Border Background="#0B141F" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="13">
               <StackPanel Spacing="5">
-                <TextBlock Text="Rollback required" FontWeight="SemiBold" />
-                <TextBlock Text="Every optimization rule must define backup and rollback before execution." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
+                <TextBlock x:Name="QueueItemThreeTitleText" Text="Rollback required" FontWeight="SemiBold" />
+                <TextBlock x:Name="QueueItemThreeBodyText" Text="Every optimization rule must define backup and rollback before execution." Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" />
               </StackPanel>
             </Border>
           </StackPanel>
@@ -230,8 +246,8 @@
             <TextBlock Text="AI" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource BlueBrush}" />
           </Border>
           <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="3">
-            <TextBlock Text="AI Tips" FontWeight="SemiBold" />
-            <TextBlock Text="Before enabling optimization, AETHER will explain the bottleneck, risk level, backup method, verification signal, and rollback path." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+            <TextBlock x:Name="TipsTitleText" Text="AI Tips" FontWeight="SemiBold" />
+            <TextBlock x:Name="TipsBodyText" Text="Before enabling optimization, AETHER will explain the bottleneck, risk level, backup method, verification signal, and rollback path." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
           </StackPanel>
         </Grid>
       </Border>
@@ -240,38 +256,38 @@
     <Border Grid.Column="2" Background="#07101A" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0" Padding="20,22">
       <Grid RowDefinitions="Auto,*,Auto">
         <StackPanel>
-          <TextBlock Text="Sentinel Feed" FontSize="20" FontWeight="SemiBold" />
-          <TextBlock Text="Live insight preview" Foreground="{StaticResource TextMutedBrush}" FontSize="12" Margin="0,6,0,0" />
+          <TextBlock x:Name="FeedTitleText" Text="Sentinel Feed" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock x:Name="FeedSubtitleText" Text="Live insight preview" Foreground="{StaticResource TextMutedBrush}" FontSize="12" Margin="0,6,0,0" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Spacing="12" Margin="0,22,0,0">
           <Border Classes="card" Padding="15">
             <StackPanel Spacing="8">
-              <TextBlock Text="Current State" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
-              <TextBlock Text="Ready for read-only scan" FontWeight="SemiBold" />
-              <TextBlock Text="No system changes are enabled in this prototype." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+              <TextBlock x:Name="CurrentStateTitleText" Text="Current State" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
+              <TextBlock x:Name="CurrentStateBodyTitleText" Text="Ready for read-only scan" FontWeight="SemiBold" />
+              <TextBlock x:Name="CurrentStateBodyText" Text="No system changes are enabled in this prototype." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
             </StackPanel>
           </Border>
           <Border Classes="card" Padding="15">
             <StackPanel Spacing="8">
-              <TextBlock Text="Game Session" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
-              <TextBlock Text="No active game detected" FontWeight="SemiBold" />
-              <TextBlock Text="Future versions will detect full-screen gaming sessions before optimization." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+              <TextBlock x:Name="GameSessionTitleText" Text="Game Session" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
+              <TextBlock x:Name="GameSessionBodyTitleText" Text="No active game detected" FontWeight="SemiBold" />
+              <TextBlock x:Name="GameSessionBodyText" Text="Future versions will detect full-screen gaming sessions before optimization." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
             </StackPanel>
           </Border>
           <Border Classes="card" Padding="15">
             <StackPanel Spacing="8">
-              <TextBlock Text="Update System" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
-              <TextBlock Text="Reserved" FontWeight="SemiBold" />
-              <TextBlock Text="Version checking, package verification, and rollback are architecture placeholders." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+              <TextBlock x:Name="UpdateSystemTitleText" Text="Update System" Foreground="{StaticResource TextMutedBrush}" FontSize="12" FontWeight="SemiBold" />
+              <TextBlock x:Name="UpdateSystemBodyTitleText" Text="Reserved" FontWeight="SemiBold" />
+              <TextBlock x:Name="UpdateSystemBodyText" Text="Version checking, package verification, and rollback are architecture placeholders." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
             </StackPanel>
           </Border>
         </StackPanel>
 
         <Border Grid.Row="2" Classes="card" Padding="15">
           <StackPanel Spacing="8">
-            <TextBlock Text="Phase 01 Preview" Foreground="{StaticResource BlueBrush}" FontWeight="SemiBold" />
-            <TextBlock Text="Avalonia shell with simulated performance data." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+            <TextBlock x:Name="PhasePreviewTitleText" Text="Phase 01 Preview" Foreground="{StaticResource BlueBrush}" FontWeight="SemiBold" />
+            <TextBlock x:Name="PhasePreviewBodyText" Text="Avalonia shell with simulated performance data." TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
           </StackPanel>
         </Border>
       </Grid>

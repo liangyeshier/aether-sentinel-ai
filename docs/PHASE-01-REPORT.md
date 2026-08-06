@@ -15,6 +15,9 @@ Completed
 - Applied a dark performance-tool visual direction inspired by BoosterX-style layout patterns.
 - Added left navigation, top performance metric cards, central AI Performance Core, Optimization Queue, Sentinel Feed, and AI Tips panel.
 - Used simulated data only.
+- Added Simplified Chinese and English UI switching.
+- Set Simplified Chinese as the default language.
+- Reduced the central AI Performance Core ring so it no longer dominates the card.
 
 ## Created Files
 
@@ -39,6 +42,7 @@ Completed
 - Use static simulated performance data.
 - Avoid real system scanning, optimization execution, or background services.
 - Preserve the product difference: explainability and safety before optimization.
+- Keep early localization lightweight inside the window code-behind until the app needs full resource-file localization.
 
 ## Testing
 
@@ -48,6 +52,7 @@ Verification performed:
 - `dotnet build AetherSentinel.sln --no-restore`
 - `dotnet run --project src/AetherSentinel.UI/AetherSentinel.UI.csproj --no-build`
 - Captured a macOS window screenshot for visual QA.
+- Verified default Simplified Chinese startup view by screenshot.
 
 Build result:
 

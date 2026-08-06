@@ -28,3 +28,9 @@ This project follows phase-based development. Each completed phase must include 
 - Simulated system metric cards.
 - Simulated AI Performance Core panel.
 - Simulated optimization queue and Sentinel Feed.
+
+### Changed
+
+- Added Simplified Chinese and English UI switching.
+- Set Simplified Chinese as the default prototype language.
+- Reduced the AI Performance Core ring size and stroke weight.
